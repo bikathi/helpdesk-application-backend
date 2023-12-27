@@ -1,4 +1,4 @@
-package org.poainternet.helpdeskapplication.accountsmodule.definitions;
+package org.poainternet.helpdeskapplication.securitymodule.definitions;
 
 public enum UserRole {
 }

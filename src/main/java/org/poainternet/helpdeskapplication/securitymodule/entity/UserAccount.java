@@ -1,4 +1,4 @@
-package org.poainternet.helpdeskapplication.accountsmodule.entity;
+package org.poainternet.helpdeskapplication.securitymodule.entity;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.poainternet.helpdeskapplication.accountsmodule.definitions.UserRole;
+import org.poainternet.helpdeskapplication.securitymodule.definitions.UserRole;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 

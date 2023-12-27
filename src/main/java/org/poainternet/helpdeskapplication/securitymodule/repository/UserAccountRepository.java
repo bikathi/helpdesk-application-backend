@@ -1,6 +1,6 @@
-package org.poainternet.helpdeskapplication.accountsmodule.repository;
+package org.poainternet.helpdeskapplication.securitymodule.repository;
 
-import org.poainternet.helpdeskapplication.accountsmodule.entity.UserAccount;
+import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
