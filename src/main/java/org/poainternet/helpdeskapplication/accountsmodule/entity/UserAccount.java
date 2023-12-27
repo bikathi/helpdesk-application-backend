@@ -39,7 +39,7 @@ public class UserAccount implements Serializable {
     @Past
     @NotEmpty
     private LocalDate dateOfBirth;
-    
+
     private Set<UserRole> userRoles;
 
     @NotEmpty
