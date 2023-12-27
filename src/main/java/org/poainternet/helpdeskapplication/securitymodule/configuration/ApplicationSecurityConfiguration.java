@@ -51,7 +51,9 @@ public class ApplicationSecurityConfiguration {
         httpSecurity
             .csrf(securityCsrfConfigurer -> securityCsrfConfigurer.disable().addFilterBefore(new StatelessCSRFFilter(), CsrfFilter.class))
             .exceptionHandling(exceptionHandlingConfigurer -> exceptionHandlingConfigurer.authenticationEntryPoint(securityExceptionHandler))
-            .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+            .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(requestMatcherRegistry -> requestMatcherRegistry.requestMatchers("/api/v1/auth/**").permitAll()
+                .anyRequest().authenticated());
 
         httpSecurity.authenticationProvider(daoAuthenticationProvider());
         httpSecurity.addFilterBefore(jwtValidationFilter(), UsernamePasswordAuthenticationFilter.class);
