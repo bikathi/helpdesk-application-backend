@@ -12,15 +12,19 @@ import java.util.stream.Collectors;
 
 @Getter
 public class UserDetailsImpl implements UserDetails {
+    private final String userid;
     private final String username;
+    private final String fullName;
+    private final String email;
     private final String password;
     private final Boolean accountEnabled;
-    private final String fullName;
     private final Collection<? extends GrantedAuthority> authorities;
 
     public UserDetailsImpl(UserAccount userAccount) {
+        this.userid = userAccount.getUserId();
         this.username = userAccount.getUsername();
         this.password = userAccount.getPassword();
+        this.email = userAccount.getEmail();
         this.accountEnabled = userAccount.getAccountEnabled();
         this.fullName = String.format(Locale.ENGLISH, "%s %s", userAccount.getFirstName(), userAccount.getLastName());
         this.authorities = userAccount.getUserRoles().stream().map(role -> new SimpleGrantedAuthority(role.name())).collect(Collectors.toList());
