@@ -23,8 +23,13 @@ spring:
   application:
     name: helpdesk-application
 
-service:
+application:
   api:
     version: 0.0.1
   organization:
-    name: Tropic World Paradise
+    name: Poa Internet
+  security:
+    jwt-secret: w0jkM6VRbQegkUUhdu0Zp0NSfxKa12y7PjKtvKF0KG7e3iohG9qXHP77Garyubiu
+    jwt-expiration-ms: 3600000 # expires after 1 hr
+
+
