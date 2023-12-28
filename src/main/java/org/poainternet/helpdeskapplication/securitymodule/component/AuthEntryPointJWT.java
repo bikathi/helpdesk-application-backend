@@ -1,4 +1,4 @@
-package org.poainternet.helpdeskapplication.securitymodule.exception;
+package org.poainternet.helpdeskapplication.securitymodule.handler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
