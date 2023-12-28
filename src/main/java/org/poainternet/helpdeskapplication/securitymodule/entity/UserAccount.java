@@ -31,7 +31,14 @@ public class UserAccount implements Serializable {
     private String firstName;
 
     @NotEmpty
+    private String username;
+
+    @NotEmpty
     private String lastName;
+
+    private String password;
+
+    private Boolean accountEnabled;
 
     @Email
     private String email;
