@@ -3,10 +3,12 @@ package org.poainternet.helpdeskapplication.securitymodule.definitions;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.UUID;
 
 public class CustomAuthenticationToken extends AbstractAuthenticationToken {
+    @Serial
     private static final long serialVersionUID = UUID.randomUUID().getLeastSignificantBits();
     private final Object principal;
     private final Object credentials;
