@@ -8,9 +8,10 @@ import org.poainternet.helpdeskapplication.securitymodule.definitions.CustomAuth
 import org.poainternet.helpdeskapplication.securitymodule.definitions.UserDetailsImpl;
 import org.poainternet.helpdeskapplication.securitymodule.definitions.UserRole;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
+import org.poainternet.helpdeskapplication.securitymodule.exception.InternalServerError;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.SignInRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.response.GenericResponse;
-import org.poainternet.helpdeskapplication.securitymodule.payload.response.SignInResponse;
+import org.poainternet.helpdeskapplication.securitymodule.payload.response.AccDetailsResponse;
 import org.poainternet.helpdeskapplication.securitymodule.service.UserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,13 +21,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collection;
+import java.net.URI;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 @Slf4j
@@ -58,28 +60,56 @@ public class AuthenticationController implements EntityModelMapper {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         UserAccount userAccount = userAccountService.getAccountByUsername(userDetails.getUsername());
         String authToken = jwtUtils.generateToken(authentication);
-        Set<String> userRoles = new RoleConverter().roleEnumColToStringCol(userAccount.getRoles());
+        Set<String> userRoles = new ControllerUtil().roleEnumColToStringCol(userAccount.getRoles());
 
-        SignInResponse response = (SignInResponse) this.convertEntityToPayload(userAccount, SignInResponse.class);
+        AccDetailsResponse response = (AccDetailsResponse) this.convertEntityToPayload(userAccount, AccDetailsResponse.class);
         response.setRoles(userRoles);
         response.setAuthToken(authToken);
         log.info("{}: successfully signed in user {}", CLASS_NAME, userDetails.getUsername());
 
         return ResponseEntity.ok().body(
-           new GenericResponse<SignInResponse>(
-               apiVersion,
-               organizationName,
-               "Login successful",
-               HttpStatus.OK.value(),
-               response
-           )
+            new GenericResponse<>(
+                apiVersion,
+                organizationName,
+                "Login successful",
+                HttpStatus.OK.value(),
+                response
+            )
         );
     }
 
     @PostMapping(value = "/signup")
     @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_MANAGER')")
-    public ResponseEntity<?> signup() {
+    public ResponseEntity<?> signup(
+        @RequestAttribute(name = "profile-picture", required = false) MultipartFile profilePicture,
+        @RequestAttribute(name = "first-name") String firstName,
+        @RequestAttribute(name = "other-name") String otherName,
+        @RequestAttribute(name = "email-address") String emailAddress,
+        @RequestAttribute(name = "date-of-birth") String dateOfBirth,
+        @RequestAttribute(name = "user-roles") String[] userRoles,
+        @RequestAttribute(name = "department") String department) {
+        UserAccount userAccount = UserAccount.builder()
+            .firstName(firstName)
+            .otherName(otherName)
+            .email(emailAddress)
+            .department(department)
+            .dateOfBirth(new ControllerUtil().dateStringToLocalDate(dateOfBirth))
+            .roles(new ControllerUtil().stringColToRoleEnumCol(userRoles))
+        .build();
+        userAccount = userAccountService.createUserAccount(userAccount, profilePicture);
+        AccDetailsResponse response = (AccDetailsResponse) this.convertEntityToPayload(userAccount, AccDetailsResponse.class);
+        response.setRoles(new ControllerUtil().roleEnumColToStringCol(userAccount.getRoles()));
+        response.setDateOfBirth(new ControllerUtil().localDateToDateString(userAccount.getDateOfBirth()));
 
+        return ResponseEntity.created(URI.create("")).body(
+            new GenericResponse<>(
+                apiVersion,
+                organizationName,
+                "Account created successfully",
+                HttpStatus.CREATED.value(),
+
+            )
+        );
     }
 
     @Override
@@ -87,34 +117,41 @@ public class AuthenticationController implements EntityModelMapper {
         return mapper.map(entity, target);
     }
 
-    private final static class RoleConverter {
+    private final static class ControllerUtil {
         private HashSet<String> roleEnumColToStringCol(Set<UserRole> roles) {
             HashSet<String> userRoles = new HashSet<>();
             roles.forEach(role -> {
                 switch(role.name()) {
-                    case "ROLE_USER" -> {
-                        userRoles.add("role_user");
-                    }
-
-                    case "ROLE_MODERATOR" -> {
-                        userRoles.add("role_moderator");
-                    }
-
-                    case "ROLE_ADMIN" -> {
-                        userRoles.add("role_admin");
-                    }
-
-                    case "ROLE_MANAGER" -> {
-                        userRoles.add("role_manager");
-                    }
+                    case "ROLE_USER" -> userRoles.add("role_user");
+                    case "ROLE_MODERATOR" -> userRoles.add("role_moderator");
+                    case "ROLE_ADMIN" -> userRoles.add("role_admin");
+                    case "ROLE_MANAGER" -> userRoles.add("role_manager");
                 }
             });
 
             return userRoles;
         }
 
-        private Set<UserRole> stringColToRoleEnumCol(Collection<String> userRoles) {
-            return null;
+        private Set<UserRole> stringColToRoleEnumCol(String[] userRoles) throws InternalServerError {
+            Set<UserRole> roles = new HashSet<>();
+            for(String role : userRoles) {
+                switch(role) {
+                    case "role_user" -> roles.add(UserRole.ROLE_USER);
+                    case "role_moderator" -> roles.add(UserRole.ROLE_MODERATOR);
+                    case "role_admin" -> roles.add(UserRole.ROLE_ADMIN);
+                    case "role_manager" -> roles.add(UserRole.ROLE_MANAGER);
+                    default -> throw new InternalServerError(String.format("Undefined role %s", role));
+                }
+            }
+            return roles;
+        }
+
+        private LocalDate dateStringToLocalDate(String date) {
+            return LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyy", Locale.ENGLISH));
+        }
+
+        private String localDateToDateString(LocalDate date) {
+            return date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.ENGLISH));
         }
     }
 }
