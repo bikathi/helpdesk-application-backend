@@ -47,7 +47,7 @@ public class UserAccount implements Serializable {
     @NotEmpty
     private LocalDate dateOfBirth;
 
-    private Set<UserRole> userRoles;
+    private Set<UserRole> roles;
 
     @NotEmpty
     private String department;
