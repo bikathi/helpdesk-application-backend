@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.poainternet.helpdeskapplication.securitymodule.definitions.UserRole;
@@ -17,6 +18,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "accounts")
@@ -34,11 +36,13 @@ public class UserAccount implements Serializable {
     private String username;
 
     @NotEmpty
-    private String lastName;
+    private String otherName;
 
     private String password;
 
     private Boolean accountEnabled;
+
+    private String profileImage;
 
     @Email
     private String email;
