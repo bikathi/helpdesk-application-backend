@@ -20,7 +20,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.csrf.CsrfFilter;
 
 @Configuration
-@EnableMethodSecurity
+@EnableMethodSecurity(
+    jsr250Enabled = true,
+    securedEnabled = true)
 public class ApplicationSecurityConfiguration {
     @Autowired
     private AuthEntryPointJWT authorizationExceptionHandler;
@@ -59,8 +61,8 @@ public class ApplicationSecurityConfiguration {
                 exceptionHandlingConfigurer.accessDeniedHandler(accessDeniedExceptionHandler);
             })
             .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(requestMatcherRegistry -> requestMatcherRegistry.requestMatchers("/api/v1/auth/**").permitAll()
-                .anyRequest().authenticated());
+            .authorizeHttpRequests(requestMatcherRegistry -> requestMatcherRegistry.requestMatchers("/api/v1/auth/signin").permitAll()
+            .anyRequest().authenticated());
 
         httpSecurity.authenticationProvider(daoAuthenticationProvider());
         httpSecurity.addFilterBefore(jwtValidationFilter(), UsernamePasswordAuthenticationFilter.class);
