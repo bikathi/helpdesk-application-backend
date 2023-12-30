@@ -14,4 +14,12 @@ public interface UserAccountRepository extends MongoRepository<UserAccount, Stri
      * @return Optional<T> that may be empty if the user does not exist
      */
     Optional<UserAccount> findByUsername(String username);
+
+    /**
+     *
+     * @param username is the username candidate we are searching for
+     * @param email is the email candidate we are searching for
+     * @return true if an account by that username or email exist
+     */
+    boolean existsByUsernameOrEmail(String username, String email);
 }
