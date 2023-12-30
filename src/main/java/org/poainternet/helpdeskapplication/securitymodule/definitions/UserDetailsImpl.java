@@ -1,6 +1,8 @@
 package org.poainternet.helpdeskapplication.securitymodule.definitions;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,12 +12,14 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
-    private final String userid;
-    private final String username;
-    private final String password;
-    private final Boolean accountEnabled;
-    private final Collection<? extends GrantedAuthority> authorities;
+    private String userid;
+    private String username;
+    private String password;
+    private Boolean accountEnabled;
+    private Collection<? extends GrantedAuthority> authorities;
 
     public UserDetailsImpl(UserAccount userAccount) {
         this.userid = userAccount.getUserId();
