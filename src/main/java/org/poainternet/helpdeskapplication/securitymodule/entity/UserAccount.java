@@ -21,7 +21,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(collection = "accounts")
+@Document(collection = "user-accounts")
 public class UserAccount implements Serializable {
     @Serial
     private static final long serialVersionUID = UUID.randomUUID().getLeastSignificantBits();
