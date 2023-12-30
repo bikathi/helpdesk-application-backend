@@ -13,7 +13,7 @@ public class AccDetailsResponse {
     private String userId;
     private String firstName;
     private String username;
-    private String lastName;
+    private String otherName;
     private String email;
     private String dateOfBirth;
     private Set<String> roles;
