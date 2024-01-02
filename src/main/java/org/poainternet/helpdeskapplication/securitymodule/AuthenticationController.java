@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.EntityModelMapper;
 import org.poainternet.helpdeskapplication.securitymodule.component.JWTUtils;
-import org.poainternet.helpdeskapplication.securitymodule.definitions.CustomAuthenticationToken;
 import org.poainternet.helpdeskapplication.securitymodule.definitions.UserDetailsImpl;
 import org.poainternet.helpdeskapplication.securitymodule.definitions.UserRole;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
@@ -19,8 +18,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,12 +54,19 @@ public class AuthenticationController implements EntityModelMapper {
     @Autowired
     private ModelMapper mapper;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
     @PostMapping(value = "/signin",  consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> signin(@RequestBody SignInRequest signInRequest) {
-        Authentication authentication = new CustomAuthenticationToken(signInRequest.getUsername(), signInRequest.getPassword());
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(signInRequest.getUsername(), signInRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
         UserAccount userAccount = userAccountService.getAccountByUsername(userDetails.getUsername());
         String authToken = jwtUtils.generateToken(authentication);
         Set<String> userRoles = new ControllerUtil().roleEnumColToStringCol(userAccount.getRoles());
@@ -65,7 +74,7 @@ public class AuthenticationController implements EntityModelMapper {
         AccDetailsResponse response = (AccDetailsResponse) this.convertEntityToPayload(userAccount, AccDetailsResponse.class);
         response.setRoles(userRoles);
         response.setAuthToken(authToken);
-        log.info("{}: successfully signed in user {}", CLASS_NAME, userDetails.getUsername());
+        log.info("{}: successfully signed in user {}", CLASS_NAME, userAccount.getUsername());
 
         return ResponseEntity.ok().body(
             new GenericResponse<>(
@@ -79,22 +88,28 @@ public class AuthenticationController implements EntityModelMapper {
     }
 
     @PostMapping(value = "/signup")
-    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_MANAGER')")
     public ResponseEntity<?> signup(
-        @RequestAttribute(name = "profile-picture", required = false) MultipartFile profilePicture,
-        @RequestAttribute(name = "first-name") String firstName,
-        @RequestAttribute(name = "other-name") String otherName,
-        @RequestAttribute(name = "email-address") String emailAddress,
-        @RequestAttribute(name = "date-of-birth") String dateOfBirth,
-        @RequestAttribute(name = "user-roles") String[] userRoles,
-        @RequestAttribute(name = "department") String department) {
+        @RequestParam(name = "profile-picture", required = false) MultipartFile profilePicture,
+        @RequestParam(name = "first-name") String firstName,
+        @RequestParam(name = "other-name") String otherName,
+        @RequestParam(name = "email-address") String emailAddress,
+        @RequestParam(name = "date-of-birth") String dateOfBirth,
+        @RequestParam(name = "user-roles") String userRoles,
+        @RequestParam(name = "department") String department) {
+        // convert string to array
+        String[] assignedRoles = userRoles.split(", ");
+
         UserAccount userAccount = UserAccount.builder()
             .firstName(firstName)
             .otherName(otherName)
+            .password(passwordEncoder.encode("poaInternetDefault"))
+            .username(String.format("@%s%s", firstName.toLowerCase(), otherName.toLowerCase()))
             .email(emailAddress)
             .department(department)
+            .accountEnabled(true)
             .dateOfBirth(new ControllerUtil().dateStringToLocalDate(dateOfBirth))
-            .roles(new ControllerUtil().stringColToRoleEnumCol(userRoles))
+            .roles(new ControllerUtil().stringColToRoleEnumCol(assignedRoles))
         .build();
         userAccount = userAccountService.createUserAccount(userAccount, profilePicture);
         AccDetailsResponse response = (AccDetailsResponse) this.convertEntityToPayload(userAccount, AccDetailsResponse.class);
@@ -107,7 +122,7 @@ public class AuthenticationController implements EntityModelMapper {
                 organizationName,
                 "Account created successfully",
                 HttpStatus.CREATED.value(),
-
+                response
             )
         );
     }
