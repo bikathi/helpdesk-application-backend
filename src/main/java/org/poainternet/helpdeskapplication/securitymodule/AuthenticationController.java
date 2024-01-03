@@ -88,7 +88,7 @@ public class AuthenticationController implements EntityModelMapper {
     }
 
     @PostMapping(value = "/signup")
-//    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_MANAGER')")
+    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_MANAGER')")
     public ResponseEntity<?> signup(
         @RequestParam(name = "profile-picture", required = false) MultipartFile profilePicture,
         @RequestParam(name = "first-name") String firstName,
@@ -139,7 +139,6 @@ public class AuthenticationController implements EntityModelMapper {
                 switch(role.name()) {
                     case "ROLE_USER" -> userRoles.add("role_user");
                     case "ROLE_MODERATOR" -> userRoles.add("role_moderator");
-                    case "ROLE_ADMIN" -> userRoles.add("role_admin");
                     case "ROLE_MANAGER" -> userRoles.add("role_manager");
                 }
             });
@@ -153,7 +152,6 @@ public class AuthenticationController implements EntityModelMapper {
                 switch(role) {
                     case "role_user" -> roles.add(UserRole.ROLE_USER);
                     case "role_moderator" -> roles.add(UserRole.ROLE_MODERATOR);
-                    case "role_admin" -> roles.add(UserRole.ROLE_ADMIN);
                     case "role_manager" -> roles.add(UserRole.ROLE_MANAGER);
                     default -> throw new InternalServerError(String.format("Undefined role %s", role));
                 }
