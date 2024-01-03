@@ -4,10 +4,15 @@ import org.poainternet.helpdeskapplication.securitymodule.definitions.UserRole;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
 import org.poainternet.helpdeskapplication.securitymodule.exception.InternalServerError;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
-public interface EntityModelMapperUtil {
+public interface GenericControllerHelper {
+    Object convertEntityToPayload(UserAccount entity, Class<?> target);
+
     default HashSet<String> roleEnumColToStringCol(Set<UserRole> roles) {
         HashSet<String> userRoles = new HashSet<>();
         roles.forEach(role -> {
@@ -32,5 +37,13 @@ public interface EntityModelMapperUtil {
             }
         }
         return roles;
+    }
+
+    default LocalDate dateStringToLocalDate(String date) {
+        return LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyy", Locale.ENGLISH));
+    }
+
+    default String localDateToDateString(LocalDate date) {
+        return date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.ENGLISH));
     }
 }
