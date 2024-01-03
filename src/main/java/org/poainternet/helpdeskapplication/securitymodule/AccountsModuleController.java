@@ -39,11 +39,29 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     private UserAccountService userAccountService;
 
     @Override
-    public ResponseEntity<?> updateUserAccount() {
+    public ResponseEntity<?> updateUserAccount(@RequestBody ModifyAccRequest request) {
         return null;
     }
 
     @Override
+    @PostMapping(value = "/modify-roles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> modifyUserRoles(@RequestBody ModifyAccRequest request) {
+        UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
+        existingAccount.setRoles(this.stringColToRoleEnumCol(request.getRoles()));
+        userAccountService.saveAccountDetails(existingAccount);
+        return ResponseEntity.ok().body(
+            new GenericResponse<>(
+                apiVersion,
+                organizationName,
+                "Operation successful",
+                HttpStatus.OK.value(),
+                null
+            )
+        );
+    }
+
+    @Override
+    @PostMapping(value = "/deactivate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deactivateUserAccount(@RequestBody ModifyAccRequest request) {
         UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
         existingAccount.setAccountEnabled(false);
