@@ -39,12 +39,31 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     private UserAccountService userAccountService;
 
     @Override
+    @PostMapping(value = "/update-account", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_USER')")
     public ResponseEntity<?> updateUserAccount(@RequestBody ModifyAccRequest request) {
-        return null;
+        UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
+        existingAccount.setFirstName(request.getFirstName());
+        existingAccount.setOtherName(request.getOtherName());
+        existingAccount.setEmail(request.getEmail());
+        existingAccount.setDateOfBirth(this.dateStringToLocalDate(request.getDateOfBirth()));
+        existingAccount.setDepartment(request.getDepartment());
+        userAccountService.saveAccountDetails(existingAccount);
+
+        return ResponseEntity.ok().body(
+            new GenericResponse<>(
+                apiVersion,
+                organizationName,
+                "Details updated successfully",
+                HttpStatus.OK.value(),
+                null
+            )
+        );
     }
 
     @Override
     @PostMapping(value = "/modify-roles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ROLE_MODERATOR')")
     public ResponseEntity<?> modifyUserRoles(@RequestBody ModifyAccRequest request) {
         UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
         existingAccount.setRoles(this.stringColToRoleEnumCol(request.getRoles()));
@@ -62,6 +81,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
 
     @Override
     @PostMapping(value = "/deactivate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_USER')")
     public ResponseEntity<?> deactivateUserAccount(@RequestBody ModifyAccRequest request) {
         UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
         existingAccount.setAccountEnabled(false);
