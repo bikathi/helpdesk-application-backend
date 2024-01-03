@@ -23,7 +23,7 @@ public class ModifyAccRequest {
     private String email;
 
     private String dateOfBirth;
-    private Set<String> roles;
+    private String[] roles;
     private String authToken;
     private String department;
 }
