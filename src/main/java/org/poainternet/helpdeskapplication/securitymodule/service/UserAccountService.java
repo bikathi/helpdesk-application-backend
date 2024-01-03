@@ -30,6 +30,12 @@ public class UserAccountService implements GenericAccountsService<UserAccount> {
     }
 
     @Override
+    public UserAccount getAccountById(String id) throws EntityNotFoundException {
+        return userAccountRepository.findById(id).orElseThrow(
+            () -> new EntityNotFoundException(String.format(Locale.ENGLISH, "Not found account for id %s", id)));
+    }
+
+    @Override
     public UserAccount createUserAccount(UserAccount userAccount, MultipartFile profileImage) throws InternalServerError {
         String profileImageUrl = null;
         if(Objects.nonNull(profileImage)) {
@@ -49,5 +55,10 @@ public class UserAccountService implements GenericAccountsService<UserAccount> {
     public List<UserAccount> findListOfAccounts(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
         return userAccountRepository.findAll(pageable).stream().peek(account -> account.setPassword(null)).collect(Collectors.toList());
+    }
+
+    @Override
+    public void saveAccountDetails(UserAccount account) {
+        userAccountRepository.save(account);
     }
 }
