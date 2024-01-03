@@ -5,6 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericControllerHelper;
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericAccountsController;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
+import org.poainternet.helpdeskapplication.securitymodule.payload.request.ModifyAccRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.response.AccDetailsResponse;
 import org.poainternet.helpdeskapplication.securitymodule.payload.response.GenericResponse;
 import org.poainternet.helpdeskapplication.securitymodule.service.UserAccountService;
@@ -14,10 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,13 +44,39 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     }
 
     @Override
-    public ResponseEntity<?> deactivateUserAccount() {
-        return null;
+    public ResponseEntity<?> deactivateUserAccount(@RequestBody ModifyAccRequest request) {
+        UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
+        existingAccount.setAccountEnabled(false);
+        userAccountService.saveAccountDetails(existingAccount);
+
+        return ResponseEntity.ok().body(
+            new GenericResponse<>(
+                apiVersion,
+                organizationName,
+                "Operation successful",
+                HttpStatus.OK.value(),
+                null
+            )
+        );
     }
 
     @Override
-    public ResponseEntity<?> activateUserAccount() {
-        return null;
+    @PostMapping(value = "/activate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ROLE_MODERATOR')")
+    public ResponseEntity<?> activateUserAccount(@RequestBody ModifyAccRequest request) {
+        UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
+        existingAccount.setAccountEnabled(true);
+        userAccountService.saveAccountDetails(existingAccount);
+
+        return ResponseEntity.ok().body(
+            new GenericResponse<>(
+                apiVersion,
+                organizationName,
+                "Operation successful",
+                HttpStatus.OK.value(),
+                null
+            )
+        );
     }
 
     @Override
