@@ -7,11 +7,15 @@ import org.poainternet.helpdeskapplication.securitymodule.exception.EntityNotFou
 import org.poainternet.helpdeskapplication.securitymodule.exception.InternalServerError;
 import org.poainternet.helpdeskapplication.securitymodule.repository.UserAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
@@ -39,5 +43,11 @@ public class UserAccountService implements GenericAccountsService<UserAccount> {
         }
 
         return userAccountRepository.save(userAccount);
+    }
+
+    @Override
+    public List<UserAccount> findListOfAccounts(Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return userAccountRepository.findAll(pageable).stream().peek(account -> account.setPassword(null)).collect(Collectors.toList());
     }
 }
