@@ -2,12 +2,10 @@ package org.poainternet.helpdeskapplication.securitymodule;
 
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.poainternet.helpdeskapplication.securitymodule.abstractions.EntityModelMapper;
+import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericControllerHelper;
 import org.poainternet.helpdeskapplication.securitymodule.component.JWTUtils;
 import org.poainternet.helpdeskapplication.securitymodule.definitions.UserDetailsImpl;
-import org.poainternet.helpdeskapplication.securitymodule.definitions.UserRole;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
-import org.poainternet.helpdeskapplication.securitymodule.exception.InternalServerError;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.SignInRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.response.GenericResponse;
 import org.poainternet.helpdeskapplication.securitymodule.payload.response.AccDetailsResponse;
@@ -27,16 +25,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
-import java.util.Locale;
 import java.util.Set;
 
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/v1/auth")
-public class AuthenticationController implements EntityModelMapper {
+public class AuthenticationController implements GenericControllerHelper {
     private final String CLASS_NAME = this.getClass().getName();
 
     @Value("${application.api.version}")
@@ -69,11 +63,12 @@ public class AuthenticationController implements EntityModelMapper {
 
         UserAccount userAccount = userAccountService.getAccountByUsername(userDetails.getUsername());
         String authToken = jwtUtils.generateToken(authentication);
-        Set<String> userRoles = new ControllerUtil().roleEnumColToStringCol(userAccount.getRoles());
+        Set<String> userRoles = this.roleEnumColToStringCol(userAccount.getRoles());
 
         AccDetailsResponse response = (AccDetailsResponse) this.convertEntityToPayload(userAccount, AccDetailsResponse.class);
         response.setRoles(userRoles);
         response.setAuthToken(authToken);
+        response.setDateOfBirth(this.localDateToDateString(userAccount.getDateOfBirth()));
         log.info("{}: successfully signed in user {}", CLASS_NAME, userAccount.getUsername());
 
         return ResponseEntity.ok().body(
@@ -108,13 +103,13 @@ public class AuthenticationController implements EntityModelMapper {
             .email(emailAddress)
             .department(department)
             .accountEnabled(true)
-            .dateOfBirth(new ControllerUtil().dateStringToLocalDate(dateOfBirth))
-            .roles(new ControllerUtil().stringColToRoleEnumCol(assignedRoles))
+            .dateOfBirth(this.dateStringToLocalDate(dateOfBirth))
+            .roles(this.stringColToRoleEnumCol(assignedRoles))
         .build();
         userAccount = userAccountService.createUserAccount(userAccount, profilePicture);
         AccDetailsResponse response = (AccDetailsResponse) this.convertEntityToPayload(userAccount, AccDetailsResponse.class);
-        response.setRoles(new ControllerUtil().roleEnumColToStringCol(userAccount.getRoles()));
-        response.setDateOfBirth(new ControllerUtil().localDateToDateString(userAccount.getDateOfBirth()));
+        response.setRoles(this.roleEnumColToStringCol(userAccount.getRoles()));
+        response.setDateOfBirth(this.localDateToDateString(userAccount.getDateOfBirth()));
 
         return ResponseEntity.created(URI.create("")).body(
             new GenericResponse<>(
@@ -130,41 +125,5 @@ public class AuthenticationController implements EntityModelMapper {
     @Override
     public Object convertEntityToPayload(UserAccount entity, Class<?> target) {
         return mapper.map(entity, target);
-    }
-
-    private final static class ControllerUtil {
-        private HashSet<String> roleEnumColToStringCol(Set<UserRole> roles) {
-            HashSet<String> userRoles = new HashSet<>();
-            roles.forEach(role -> {
-                switch(role.name()) {
-                    case "ROLE_USER" -> userRoles.add("role_user");
-                    case "ROLE_MODERATOR" -> userRoles.add("role_moderator");
-                    case "ROLE_MANAGER" -> userRoles.add("role_manager");
-                }
-            });
-
-            return userRoles;
-        }
-
-        private Set<UserRole> stringColToRoleEnumCol(String[] userRoles) throws InternalServerError {
-            Set<UserRole> roles = new HashSet<>();
-            for(String role : userRoles) {
-                switch(role) {
-                    case "role_user" -> roles.add(UserRole.ROLE_USER);
-                    case "role_moderator" -> roles.add(UserRole.ROLE_MODERATOR);
-                    case "role_manager" -> roles.add(UserRole.ROLE_MANAGER);
-                    default -> throw new InternalServerError(String.format("Undefined role %s", role));
-                }
-            }
-            return roles;
-        }
-
-        private LocalDate dateStringToLocalDate(String date) {
-            return LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyy", Locale.ENGLISH));
-        }
-
-        private String localDateToDateString(LocalDate date) {
-            return date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.ENGLISH));
-        }
     }
 }
