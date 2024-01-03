@@ -6,4 +6,5 @@ public interface GenericAccountsController {
     ResponseEntity<?> updateUserAccount();
     ResponseEntity<?> deactivateUserAccount();
     ResponseEntity<?> activateUserAccount();
+    ResponseEntity<?> getAccountsAsPage();
 }
