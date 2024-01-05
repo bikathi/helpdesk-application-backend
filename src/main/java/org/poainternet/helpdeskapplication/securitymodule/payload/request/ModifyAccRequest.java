@@ -1,6 +1,7 @@
 package org.poainternet.helpdeskapplication.securitymodule.payload.request;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +13,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ModifyAccRequest {
-    @NotNull
+    @NotEmpty
     private String userId;
 
     private String firstName;
