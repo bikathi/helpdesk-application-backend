@@ -6,7 +6,7 @@ import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericCo
 import org.poainternet.helpdeskapplication.securitymodule.component.JWTUtils;
 import org.poainternet.helpdeskapplication.securitymodule.definitions.UserDetailsImpl;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
-import org.poainternet.helpdeskapplication.securitymodule.exception.InternalServerError;
+import org.poainternet.helpdeskapplication.sharedexceptions.InternalServerError;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.SignInRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.UpdatePasswordRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.response.AccDetailsResponse;
@@ -22,10 +22,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 import java.util.Set;
@@ -85,7 +82,7 @@ public class AuthenticationController implements GenericControllerHelper {
         );
     }
 
-    @PostMapping(value = "/password-reset")
+    @PatchMapping(value = "/password-reset")
     public ResponseEntity<?> updateAccountPassword(@RequestBody UpdatePasswordRequest request) {
         if(!Objects.equals(request.getNewPassword(), request.getPasswordConfirmation())) {
             throw new InternalServerError("New passwords do not match");

@@ -5,7 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericControllerHelper;
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericAccountsController;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
-import org.poainternet.helpdeskapplication.securitymodule.exception.InternalServerError;
+import org.poainternet.helpdeskapplication.sharedexceptions.InternalServerError;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.ModifyAccRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.UpdatePasswordRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.response.AccDetailsResponse;
@@ -24,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -88,7 +87,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     }
 
     @Override
-    @PostMapping(value = "/update-account", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/update-account", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_USER')")
     public ResponseEntity<?> updateUserAccount(@RequestBody ModifyAccRequest request) {
         UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
@@ -111,7 +110,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     }
 
     @Override
-    @PostMapping(value = "/update-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/update-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_USER') and #request.userid == authentication.principal.userid")
     public ResponseEntity<?> updateAccountPassword(@RequestBody UpdatePasswordRequest request) {
         if(!Objects.equals(request.getNewPassword(), request.getPasswordConfirmation())) {
@@ -138,7 +137,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     }
 
     @Override
-    @PostMapping(value = "/modify-roles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/modify-roles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_MODERATOR')")
     public ResponseEntity<?> modifyUserRoles(@RequestBody ModifyAccRequest request) {
         UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
@@ -156,7 +155,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     }
 
     @Override
-    @PostMapping(value = "/deactivate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/deactivate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_USER')")
     public ResponseEntity<?> deactivateUserAccount(@RequestBody ModifyAccRequest request) {
         UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
@@ -175,7 +174,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     }
 
     @Override
-    @PostMapping(value = "/activate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/activate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_MODERATOR')")
     public ResponseEntity<?> activateUserAccount(@RequestBody ModifyAccRequest request) {
         UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
