@@ -6,26 +6,28 @@ import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericCo
 import org.poainternet.helpdeskapplication.securitymodule.component.JWTUtils;
 import org.poainternet.helpdeskapplication.securitymodule.definitions.UserDetailsImpl;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
-import org.poainternet.helpdeskapplication.securitymodule.payload.request.ModifyAccRequest;
+import org.poainternet.helpdeskapplication.securitymodule.exception.InternalServerError;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.SignInRequest;
-import org.poainternet.helpdeskapplication.securitymodule.payload.response.GenericResponse;
+import org.poainternet.helpdeskapplication.securitymodule.payload.request.UpdatePasswordRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.response.AccDetailsResponse;
+import org.poainternet.helpdeskapplication.securitymodule.payload.response.GenericResponse;
 import org.poainternet.helpdeskapplication.securitymodule.service.UserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
+import java.util.Objects;
 import java.util.Set;
 
 @Slf4j
@@ -84,8 +86,24 @@ public class AuthenticationController implements GenericControllerHelper {
     }
 
     @PostMapping(value = "/password-reset")
-    public ResponseEntity<?> updateAccountPassword(@RequestBody ModifyAccRequest request) {
-        return null;
+    public ResponseEntity<?> updateAccountPassword(@RequestBody UpdatePasswordRequest request) {
+        if(!Objects.equals(request.getNewPassword(), request.getPasswordConfirmation())) {
+            throw new InternalServerError("New passwords do not match");
+        }
+
+        UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
+        existingAccount.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userAccountService.saveAccountDetails(existingAccount);
+
+        return ResponseEntity.ok().body(
+            new GenericResponse<>(
+                apiVersion,
+                organizationName,
+                "Password updated successfully",
+                HttpStatus.OK.value(),
+                null
+            )
+        );
     }
 
     @Override
