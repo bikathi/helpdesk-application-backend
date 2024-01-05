@@ -1,4 +1,4 @@
-package org.poainternet.helpdeskapplication.securitymodule.exception;
+package org.poainternet.helpdeskapplication.sharedexceptions;
 
 public class EntityNotFoundException extends RuntimeException {
     public EntityNotFoundException() {
