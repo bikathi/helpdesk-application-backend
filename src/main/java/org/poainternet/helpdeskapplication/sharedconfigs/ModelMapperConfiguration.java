@@ -1,4 +1,4 @@
-package org.poainternet.helpdeskapplication.sharedmodule;
+package org.poainternet.helpdeskapplication.sharedconfigs;
 
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
