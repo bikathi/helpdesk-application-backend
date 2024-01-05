@@ -6,6 +6,7 @@ import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericCo
 import org.poainternet.helpdeskapplication.securitymodule.component.JWTUtils;
 import org.poainternet.helpdeskapplication.securitymodule.definitions.UserDetailsImpl;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
+import org.poainternet.helpdeskapplication.securitymodule.payload.request.ModifyAccRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.SignInRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.response.GenericResponse;
 import org.poainternet.helpdeskapplication.securitymodule.payload.response.AccDetailsResponse;
@@ -82,44 +83,9 @@ public class AuthenticationController implements GenericControllerHelper {
         );
     }
 
-    @PostMapping(value = "/signup")
-    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_MANAGER')")
-    public ResponseEntity<?> signup(
-        @RequestParam(name = "profile-picture", required = false) MultipartFile profilePicture,
-        @RequestParam(name = "first-name") String firstName,
-        @RequestParam(name = "other-name") String otherName,
-        @RequestParam(name = "email-address") String emailAddress,
-        @RequestParam(name = "date-of-birth") String dateOfBirth,
-        @RequestParam(name = "user-roles") String userRoles,
-        @RequestParam(name = "department") String department) {
-        // convert string to array
-        String[] assignedRoles = userRoles.split(", ");
-
-        UserAccount userAccount = UserAccount.builder()
-            .firstName(firstName)
-            .otherName(otherName)
-            .password(passwordEncoder.encode("poaInternetDefault"))
-            .username(String.format("@%s%s", firstName.toLowerCase(), otherName.toLowerCase()))
-            .email(emailAddress)
-            .department(department)
-            .accountEnabled(true)
-            .dateOfBirth(this.dateStringToLocalDate(dateOfBirth))
-            .roles(this.stringColToRoleEnumCol(assignedRoles))
-        .build();
-        userAccount = userAccountService.createUserAccount(userAccount, profilePicture);
-        AccDetailsResponse response = (AccDetailsResponse) this.convertEntityToPayload(userAccount, AccDetailsResponse.class);
-        response.setRoles(this.roleEnumColToStringCol(userAccount.getRoles()));
-        response.setDateOfBirth(this.localDateToDateString(userAccount.getDateOfBirth()));
-
-        return ResponseEntity.created(URI.create("")).body(
-            new GenericResponse<>(
-                apiVersion,
-                organizationName,
-                "Account created successfully",
-                HttpStatus.CREATED.value(),
-                response
-            )
-        );
+    @PostMapping(value = "/password-reset")
+    public ResponseEntity<?> updateAccountPassword(@RequestBody ModifyAccRequest request) {
+        return null;
     }
 
     @Override

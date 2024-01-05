@@ -17,8 +17,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -40,6 +43,49 @@ public class AccountsModuleController implements GenericAccountsController, Gene
 
     @Autowired
     private UserAccountService userAccountService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @PostMapping(value = "/signup")
+    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_MANAGER')")
+    public ResponseEntity<?> signup(
+            @RequestParam(name = "profile-picture", required = false) MultipartFile profilePicture,
+            @RequestParam(name = "first-name") String firstName,
+            @RequestParam(name = "other-name") String otherName,
+            @RequestParam(name = "email-address") String emailAddress,
+            @RequestParam(name = "date-of-birth") String dateOfBirth,
+            @RequestParam(name = "user-roles") String userRoles,
+            @RequestParam(name = "department") String department) {
+        // convert string roles to array
+        String[] assignedRoles = userRoles.split(", ");
+
+        UserAccount userAccount = UserAccount.builder()
+            .firstName(firstName)
+            .otherName(otherName)
+            .password(passwordEncoder.encode("poaInternetDefault"))
+            .username(String.format("@%s%s", firstName.toLowerCase(), otherName.toLowerCase()))
+            .email(emailAddress)
+            .department(department)
+            .accountEnabled(true)
+            .dateOfBirth(this.dateStringToLocalDate(dateOfBirth))
+            .roles(this.stringColToRoleEnumCol(assignedRoles))
+            .build();
+        userAccount = userAccountService.createUserAccount(userAccount, profilePicture);
+        AccDetailsResponse response = (AccDetailsResponse) this.convertEntityToPayload(userAccount, AccDetailsResponse.class);
+        response.setRoles(this.roleEnumColToStringCol(userAccount.getRoles()));
+        response.setDateOfBirth(this.localDateToDateString(userAccount.getDateOfBirth()));
+
+        return ResponseEntity.created(URI.create("")).body(
+            new GenericResponse<>(
+                apiVersion,
+                organizationName,
+                "Account created successfully",
+                HttpStatus.CREATED.value(),
+                response
+            )
+        );
+    }
 
     @Override
     @PostMapping(value = "/update-account", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -77,9 +123,8 @@ public class AccountsModuleController implements GenericAccountsController, Gene
             throw new InternalServerError("Old password is invalid");
         }
 
-        existingAccount.setPassword(request.getNewPassword());
+        existingAccount.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userAccountService.saveAccountDetails(existingAccount);
-
 
         return ResponseEntity.ok().body(
             new GenericResponse<>(
