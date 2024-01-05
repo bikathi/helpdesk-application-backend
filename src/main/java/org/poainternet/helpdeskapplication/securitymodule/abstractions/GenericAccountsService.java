@@ -1,7 +1,7 @@
 package org.poainternet.helpdeskapplication.securitymodule.abstractions;
 
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
-import org.poainternet.helpdeskapplication.securitymodule.exception.EntityNotFoundException;
+import org.poainternet.helpdeskapplication.sharedexceptions.EntityNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

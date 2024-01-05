@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class UpdatePasswordRequest extends ModifyAccRequest {
-    @NotEmpty
     private String oldPassword;
 
     @NotEmpty
