@@ -9,6 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Getter
@@ -60,7 +61,28 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     @Override
+    public String toString() {
+        return "UserDetailsImpl{" +
+            "userid='" + userid + '\'' +
+            ", username='" + username + '\'' +
+            ", password='" + password + '\'' +
+            ", accountEnabled=" + accountEnabled +
+            ", authorities=" + authorities +
+            '}';
+    }
+
+    @Override
     public boolean isEnabled() {
         return this.accountEnabled;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        UserDetailsImpl user = (UserDetailsImpl) o;
+        return Objects.equals(userid, user.userid);
     }
 }
