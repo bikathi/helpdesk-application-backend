@@ -2,7 +2,7 @@ package org.poainternet.helpdeskapplication.securitymodule.abstractions;
 
 import org.poainternet.helpdeskapplication.securitymodule.definitions.UserRole;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
-import org.poainternet.helpdeskapplication.securitymodule.exception.InternalServerError;
+import org.poainternet.helpdeskapplication.sharedexceptions.InternalServerError;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

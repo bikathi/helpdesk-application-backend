@@ -11,4 +11,5 @@ public interface GenericAccountsController {
     ResponseEntity<?> deactivateUserAccount(ModifyAccRequest request);
     ResponseEntity<?> activateUserAccount(ModifyAccRequest request);
     ResponseEntity<?> getAccountsAsPage(Integer page, Integer size);
+    ResponseEntity<?> getAccountById(String userId);
 }
