@@ -1,5 +1,6 @@
 package org.poainternet.helpdeskapplication.securitymodule;
 
+import jakarta.validation.constraints.NotEmpty;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericControllerHelper;
@@ -195,7 +196,9 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     @Override
     @GetMapping(value = "/get-list", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_MANAGER')")
-    public ResponseEntity<?> getAccountsAsPage(@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer size) {
+    public ResponseEntity<?> getAccountsAsPage(
+        @RequestParam(name = "page", defaultValue = "0") Integer page,
+        @RequestParam(name = "size", defaultValue = "10") Integer size) {
         List<UserAccount> userAccounts = userAccountService.findListOfAccounts(page, size);
         List<AccDetailsResponse> responseList = userAccounts.parallelStream().map(
             account -> {
@@ -213,6 +216,28 @@ public class AccountsModuleController implements GenericAccountsController, Gene
                 "Successfully retrieved paged accounts list",
                 HttpStatus.OK.value(),
                 responseList
+            )
+        );
+    }
+
+    @Override
+    @GetMapping(value = "/get-account", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_MANAGER') or hasRole('ROLE_USER')")
+    public ResponseEntity<?> getAccountById(@RequestParam(name = "userId") String userId) {
+        log.info("request has reached controller...");
+        UserAccount existingAccount = userAccountService.getAccountById(userId);
+        AccDetailsResponse response = (AccDetailsResponse) this.convertEntityToPayload(existingAccount, AccDetailsResponse.class);
+        response.setRoles(this.roleEnumColToStringCol(existingAccount.getRoles()));
+        response.setDateOfBirth(this.localDateToDateString(existingAccount.getDateOfBirth()));
+
+        log.info("{}: successfully retrieved account for userId {}", CLASS_NAME, userId);
+        return ResponseEntity.ok().body(
+            new GenericResponse<>(
+                apiVersion,
+                organizationName,
+                "Successfully retrieved paged accounts list",
+                HttpStatus.OK.value(),
+                response
             )
         );
     }
