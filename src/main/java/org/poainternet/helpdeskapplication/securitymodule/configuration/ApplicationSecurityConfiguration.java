@@ -71,8 +71,10 @@ public class ApplicationSecurityConfiguration {
                 exceptionHandlingConfigurer.authenticationEntryPoint(authorizationExceptionHandler);
             })
             .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(requestMatcherRegistry ->
-                requestMatcherRegistry.requestMatchers("/api/v1/auth/**").permitAll())
+            .authorizeHttpRequests(requestMatcherRegistry -> {
+                requestMatcherRegistry.requestMatchers("/api/v1/auth/**").permitAll();
+                requestMatcherRegistry.anyRequest().authenticated();
+            })
             .authenticationProvider(daoAuthenticationProvider())
             .addFilterBefore(jwtValidationFilter(), UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(statelessCSRFFilter(), CsrfFilter.class);
