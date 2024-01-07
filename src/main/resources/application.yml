@@ -1,24 +1,25 @@
 spring:
+  profiles:
+    active: dev
   activemq:
     broker-url: tcp://localhost:61616
-    user: admin
-    password: admin
+    user:
+    password:
   data:
     mongodb:
       uri: mongodb://127.0.0.1:27017/helpdesk-application
   # cache connection information
   redis:
-    host: localhost
-    port: 6379
+    host:
+    port:
     timeout: 10000 # in milliseconds
-
   # caching configuration
   cache:
     redis:
       cache-null-values: false
       # use the following two in conjunction
       use-key-prefix: true
-      key-prefix: library
+      key-prefix: poa
       time-to-live: 60000 # in milliseconds
   application:
     name: helpdesk-application
@@ -29,7 +30,8 @@ application:
   organization:
     name: Poa Internet
   security:
-    jwt-secret: w0jkM6VRbQegkUUhdu0Zp0NSfxKa12y7PjKtvKF0KG7e3iohG9qXHP77Garyubiu
-    jwt-expiration-ms: 3600000 # expires after 1 hr
+    jwt-secret:
+    jwt-expiration-ms:  # expires after 1 hr
+    xsrf-secret:
 
 
