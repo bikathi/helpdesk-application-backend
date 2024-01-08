@@ -1,11 +1,11 @@
 package org.poainternet.helpdeskapplication.securitymodule;
 
-import jakarta.validation.constraints.NotEmpty;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericControllerHelper;
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericAccountsController;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
+import org.poainternet.helpdeskapplication.sharedconfigs.CorsConfiguration;
 import org.poainternet.helpdeskapplication.sharedexceptions.InternalServerError;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.ModifyAccRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.UpdatePasswordRequest;
@@ -29,6 +29,7 @@ import java.util.Objects;
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/v1/accounts")
+@CorsConfiguration
 public class AccountsModuleController implements GenericAccountsController, GenericControllerHelper {
     private final String CLASS_NAME = this.getClass().getName();
 
@@ -112,19 +113,20 @@ public class AccountsModuleController implements GenericAccountsController, Gene
 
     @Override
     @PatchMapping(value = "/update-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('ROLE_USER') and #request.userid == authentication.principal.userid")
+    @PreAuthorize("hasRole('ROLE_USER') and #request.userId == authentication.principal.userid")
     public ResponseEntity<?> updateAccountPassword(@RequestBody UpdatePasswordRequest request) {
         if(!Objects.equals(request.getNewPassword(), request.getPasswordConfirmation())) {
             throw new InternalServerError("New passwords do not match");
         }
 
         UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
-        if(!Objects.equals(existingAccount.getPassword(), request.getOldPassword())) {
+        if(!passwordEncoder.matches(request.getOldPassword(), existingAccount.getPassword())) {
             throw new InternalServerError("Old password is invalid");
         }
 
         existingAccount.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userAccountService.saveAccountDetails(existingAccount);
+        log.info("Successfully updated password for user {}", request.getUserId());
 
         return ResponseEntity.ok().body(
             new GenericResponse<>(
