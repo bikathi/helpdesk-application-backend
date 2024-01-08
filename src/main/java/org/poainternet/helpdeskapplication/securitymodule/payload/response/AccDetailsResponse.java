@@ -18,5 +18,6 @@ public class AccDetailsResponse {
     private String dateOfBirth;
     private Set<String> roles;
     private String authToken;
+    private String csrfToken;
     private String department;
 }

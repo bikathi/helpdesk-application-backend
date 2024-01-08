@@ -6,6 +6,7 @@ import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericCo
 import org.poainternet.helpdeskapplication.securitymodule.component.JWTUtils;
 import org.poainternet.helpdeskapplication.securitymodule.definitions.UserDetailsImpl;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
+import org.poainternet.helpdeskapplication.sharedconfigs.CorsConfiguration;
 import org.poainternet.helpdeskapplication.sharedexceptions.InternalServerError;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.SignInRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.UpdatePasswordRequest;
@@ -14,9 +15,7 @@ import org.poainternet.helpdeskapplication.securitymodule.payload.response.Gener
 import org.poainternet.helpdeskapplication.securitymodule.service.UserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,6 +29,7 @@ import java.util.Set;
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/v1/auth")
+@CorsConfiguration
 public class AuthenticationController implements GenericControllerHelper {
     private final String CLASS_NAME = this.getClass().getName();
 
@@ -38,6 +38,9 @@ public class AuthenticationController implements GenericControllerHelper {
 
     @Value("${application.organization.name}")
     private String organizationName;
+
+    @Value("${application.security.xsrf-secret}")
+    private String xsrfSecret;
 
     @Autowired
     private UserAccountService userAccountService;
@@ -68,6 +71,7 @@ public class AuthenticationController implements GenericControllerHelper {
         AccDetailsResponse response = (AccDetailsResponse) this.convertEntityToPayload(userAccount, AccDetailsResponse.class);
         response.setRoles(userRoles);
         response.setAuthToken(authToken);
+        response.setCsrfToken(xsrfSecret);
         response.setDateOfBirth(this.localDateToDateString(userAccount.getDateOfBirth()));
         log.info("{}: successfully signed in user {}", CLASS_NAME, userAccount.getUsername());
 
