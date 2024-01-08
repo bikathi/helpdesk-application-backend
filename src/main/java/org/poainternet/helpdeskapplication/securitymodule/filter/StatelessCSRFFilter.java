@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,16 +22,13 @@ public class StatelessCSRFFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if(new DefaultRequiresCsrfMatcher().matches(request)) {
-            log.info("Running stateless CSRF filter...");
             final String csrfTokenValue = request.getHeader("X-CSRF-TOKEN");
             final Cookie[] cookies = request.getCookies();
             String csrfCookieValue = null;
 
-            if(Objects.nonNull(cookies)) {
-                for(Cookie cookie : cookies) {
-                    if(Objects.equals(cookie.getName(), "CSRF-TOKEN")) {
-                        csrfCookieValue = cookie.getValue();
-                    }
+            for (Cookie cookie : cookies) {
+                if (Objects.equals(cookie.getName(), "CSRF-TOKEN")) {
+                    csrfCookieValue = cookie.getValue();
                 }
             }
 
