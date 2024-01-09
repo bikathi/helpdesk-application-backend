@@ -39,12 +39,12 @@ public class SharedControllerAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<?> handleInternalServerError(InternalServerError ex) {
         log.info("{}: dispatching event for InternalServerError", CLASS_NAME);
-        return ResponseEntity.ok().body(
+        return ResponseEntity.internalServerError().body(
             new GenericResponse<>(
                 apiVersion,
                 organizationName,
                 ex.getMessage(),
-                HttpStatus.OK.value(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 null
             )
         );
