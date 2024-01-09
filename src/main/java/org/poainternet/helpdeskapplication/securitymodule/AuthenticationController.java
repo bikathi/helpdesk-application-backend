@@ -6,7 +6,6 @@ import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericCo
 import org.poainternet.helpdeskapplication.securitymodule.component.JWTUtils;
 import org.poainternet.helpdeskapplication.securitymodule.definitions.UserDetailsImpl;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
-import org.poainternet.helpdeskapplication.sharedconfigs.CorsConfiguration;
 import org.poainternet.helpdeskapplication.sharedexceptions.InternalServerError;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.SignInRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.UpdatePasswordRequest;
@@ -29,7 +28,6 @@ import java.util.Set;
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/v1/auth")
-@CorsConfiguration
 public class AuthenticationController implements GenericControllerHelper {
     private final String CLASS_NAME = this.getClass().getName();
 

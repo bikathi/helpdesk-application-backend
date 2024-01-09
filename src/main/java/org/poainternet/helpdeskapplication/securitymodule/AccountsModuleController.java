@@ -5,7 +5,6 @@ import org.modelmapper.ModelMapper;
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericControllerHelper;
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericAccountsController;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
-import org.poainternet.helpdeskapplication.sharedconfigs.CorsConfiguration;
 import org.poainternet.helpdeskapplication.sharedexceptions.InternalServerError;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.ModifyAccRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.UpdatePasswordRequest;
@@ -29,7 +28,6 @@ import java.util.Objects;
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/v1/accounts")
-@CorsConfiguration
 public class AccountsModuleController implements GenericAccountsController, GenericControllerHelper {
     private final String CLASS_NAME = this.getClass().getName();
 
