@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,7 +21,7 @@ public class StatelessCSRFFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if(new DefaultRequiresCsrfMatcher().matches(request)) {
-            final String csrfTokenValue = request.getHeader("X-CSRF-TOKEN");
+            final String csrfHeaderValue = request.getHeader("X-CSRF-TOKEN");
             final Cookie[] cookies = request.getCookies();
             String csrfCookieValue = null;
 
@@ -32,7 +31,7 @@ public class StatelessCSRFFilter extends OncePerRequestFilter {
                 }
             }
 
-            if(Objects.isNull(csrfTokenValue) || !Objects.equals(csrfTokenValue, csrfCookieValue)) {
+            if(Objects.isNull(csrfHeaderValue) || !Objects.equals(csrfHeaderValue, csrfCookieValue)) {
                 throw new CustomAuthenticationException("Missing required or non-matching CSRF token");
             }
         }
@@ -42,7 +41,7 @@ public class StatelessCSRFFilter extends OncePerRequestFilter {
 
     public static final class DefaultRequiresCsrfMatcher implements RequestMatcher {
         private final List<String> allowedHttpMethods = List.of("GET", "HEAD", "TRACE", "OPTIONS");
-        private final List<String> allowedURIs = List.of("/api/v1/auth/signin", "/api/v1/auth/signup");
+        private final List<String> allowedURIs = List.of("/api/v1/auth/signin");
 
         @Override
         public boolean matches(HttpServletRequest request) {
