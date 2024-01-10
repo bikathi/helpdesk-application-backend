@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ModifyAccRequest {
+public class ManAccRequest {
     @NotEmpty
     private String userId;
 
@@ -19,6 +19,7 @@ public class ModifyAccRequest {
 
     @Email
     private String email;
+    private String profileURL;
 
     private String dateOfBirth;
     private String[] roles;
