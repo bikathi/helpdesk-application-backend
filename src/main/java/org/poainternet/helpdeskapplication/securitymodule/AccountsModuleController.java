@@ -47,13 +47,13 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     private PasswordEncoder passwordEncoder;
 
     @PostMapping(value = "/signup")
-    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> signup(@RequestBody ManAccRequest request) {
         UserAccount userAccount = UserAccount.builder()
             .firstName(request.getFirstName())
             .otherName(request.getOtherName())
             .password(passwordEncoder.encode("poaInternetDefault"))
-            .username(String.format("@%s%s", request.getFirstName().toLowerCase(), request.getOtherName().toLowerCase()))
+            .username(request.getUsername())
             .email(request.getEmail())
             .department(request.getDepartment())
             .profileImage(request.getProfileURL())
@@ -66,7 +66,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
         response.setRoles(this.roleEnumColToStringCol(userAccount.getRoles()));
         response.setDateOfBirth(this.localDateToDateString(userAccount.getDateOfBirth()));
 
-        return ResponseEntity.created(URI.create("")).body(
+        return ResponseEntity.ok().body(
             new GenericResponse<>(
                 apiVersion,
                 organizationName,
