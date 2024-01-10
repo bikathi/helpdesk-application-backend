@@ -9,7 +9,7 @@ import java.util.List;
 public interface GenericAccountsService<T> {
     UserAccount getAccountByUsername(String username) throws EntityNotFoundException;
     UserAccount getAccountById(String id) throws EntityNotFoundException;
-    UserAccount createUserAccount(UserAccount userAccount, MultipartFile profileImage);
+    UserAccount createUserAccount(UserAccount userAccount);
     List<UserAccount> findListOfAccounts(Integer page, Integer size);
     void saveAccountDetails(UserAccount account);
 }

@@ -36,14 +36,7 @@ public class UserAccountService implements GenericAccountsService<UserAccount> {
     }
 
     @Override
-    public UserAccount createUserAccount(UserAccount userAccount, MultipartFile profileImage) throws InternalServerError {
-        String profileImageUrl = null;
-        if(Objects.nonNull(profileImage)) {
-            // TODO: upload profile image
-        }
-
-        userAccount.setProfileImage(profileImageUrl);
-
+    public UserAccount createUserAccount(UserAccount userAccount) throws InternalServerError {
         if(userAccountRepository.existsByUsernameOrEmail(userAccount.getUsername(), userAccount.getEmail())) {
             throw new InternalServerError("Email or username already in use");
         }
