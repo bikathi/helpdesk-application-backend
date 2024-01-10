@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class UpdatePasswordRequest extends ModifyAccRequest {
+public class UpdatePasswordRequest extends ManAccRequest {
     private String oldPassword;
 
     @NotEmpty
