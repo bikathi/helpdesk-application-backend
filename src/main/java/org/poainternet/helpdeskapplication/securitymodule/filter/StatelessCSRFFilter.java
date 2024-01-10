@@ -41,7 +41,7 @@ public class StatelessCSRFFilter extends OncePerRequestFilter {
 
     public static final class DefaultRequiresCsrfMatcher implements RequestMatcher {
         private final List<String> allowedHttpMethods = List.of("GET", "HEAD", "TRACE", "OPTIONS");
-        private final List<String> allowedURIs = List.of("/api/v1/auth/signin");
+        private final List<String> allowedURIs = List.of("/api/v1/auth/signin", "/api/v1/auth/password-reset");
 
         @Override
         public boolean matches(HttpServletRequest request) {
