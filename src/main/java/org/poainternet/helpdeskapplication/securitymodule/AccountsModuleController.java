@@ -6,7 +6,7 @@ import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericCo
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericAccountsController;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
 import org.poainternet.helpdeskapplication.sharedexceptions.InternalServerError;
-import org.poainternet.helpdeskapplication.securitymodule.payload.request.ModifyAccRequest;
+import org.poainternet.helpdeskapplication.securitymodule.payload.request.ManAccRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.UpdatePasswordRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.response.AccDetailsResponse;
 import org.poainternet.helpdeskapplication.securitymodule.payload.response.GenericResponse;
@@ -47,30 +47,21 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     private PasswordEncoder passwordEncoder;
 
     @PostMapping(value = "/signup")
-    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_MANAGER')")
-    public ResponseEntity<?> signup(
-            @RequestParam(name = "profile-picture", required = false) MultipartFile profilePicture,
-            @RequestParam(name = "first-name") String firstName,
-            @RequestParam(name = "other-name") String otherName,
-            @RequestParam(name = "email-address") String emailAddress,
-            @RequestParam(name = "date-of-birth") String dateOfBirth,
-            @RequestParam(name = "user-roles") String userRoles,
-            @RequestParam(name = "department") String department) {
-        // convert string roles to array
-        String[] assignedRoles = userRoles.split(", ");
-
+    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> signup(@RequestBody ManAccRequest request) {
         UserAccount userAccount = UserAccount.builder()
-            .firstName(firstName)
-            .otherName(otherName)
+            .firstName(request.getFirstName())
+            .otherName(request.getOtherName())
             .password(passwordEncoder.encode("poaInternetDefault"))
-            .username(String.format("@%s%s", firstName.toLowerCase(), otherName.toLowerCase()))
-            .email(emailAddress)
-            .department(department)
+            .username(String.format("@%s%s", request.getFirstName().toLowerCase(), request.getOtherName().toLowerCase()))
+            .email(request.getEmail())
+            .department(request.getDepartment())
+            .profileImage(request.getProfileURL())
             .accountEnabled(true)
-            .dateOfBirth(this.dateStringToLocalDate(dateOfBirth))
-            .roles(this.stringColToRoleEnumCol(assignedRoles))
-            .build();
-        userAccount = userAccountService.createUserAccount(userAccount, profilePicture);
+            .dateOfBirth(this.dateStringToLocalDate(request.getDateOfBirth()))
+            .roles(this.stringColToRoleEnumCol(request.getRoles()))
+        .build();
+        userAccount = userAccountService.createUserAccount(userAccount);
         AccDetailsResponse response = (AccDetailsResponse) this.convertEntityToPayload(userAccount, AccDetailsResponse.class);
         response.setRoles(this.roleEnumColToStringCol(userAccount.getRoles()));
         response.setDateOfBirth(this.localDateToDateString(userAccount.getDateOfBirth()));
@@ -89,12 +80,14 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     @Override
     @PutMapping(value = "/update-account", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_USER')")
-    public ResponseEntity<?> updateUserAccount(@RequestBody ModifyAccRequest request) {
+    public ResponseEntity<?> updateUserAccount(@RequestBody ManAccRequest request) {
         UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
         existingAccount.setFirstName(request.getFirstName());
         existingAccount.setOtherName(request.getOtherName());
+        existingAccount.setUsername(request.getUsername());
         existingAccount.setEmail(request.getEmail());
         existingAccount.setDateOfBirth(this.dateStringToLocalDate(request.getDateOfBirth()));
+        existingAccount.setRoles(this.stringColToRoleEnumCol(request.getRoles()));
         existingAccount.setDepartment(request.getDepartment());
         userAccountService.saveAccountDetails(existingAccount);
 
@@ -140,7 +133,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     @Override
     @PatchMapping(value = "/modify-roles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_MODERATOR')")
-    public ResponseEntity<?> modifyUserRoles(@RequestBody ModifyAccRequest request) {
+    public ResponseEntity<?> modifyUserRoles(@RequestBody ManAccRequest request) {
         UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
         existingAccount.setRoles(this.stringColToRoleEnumCol(request.getRoles()));
         userAccountService.saveAccountDetails(existingAccount);
@@ -158,7 +151,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     @Override
     @PatchMapping(value = "/deactivate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_USER')")
-    public ResponseEntity<?> deactivateUserAccount(@RequestBody ModifyAccRequest request) {
+    public ResponseEntity<?> deactivateUserAccount(@RequestBody ManAccRequest request) {
         UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
         existingAccount.setAccountEnabled(false);
         userAccountService.saveAccountDetails(existingAccount);
@@ -177,7 +170,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     @Override
     @PatchMapping(value = "/activate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_MODERATOR')")
-    public ResponseEntity<?> activateUserAccount(@RequestBody ModifyAccRequest request) {
+    public ResponseEntity<?> activateUserAccount(@RequestBody ManAccRequest request) {
         UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
         existingAccount.setAccountEnabled(true);
         userAccountService.saveAccountDetails(existingAccount);
@@ -195,7 +188,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
 
     @Override
     @GetMapping(value = "/get-list", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_MANAGER')")
+    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> getAccountsAsPage(
         @RequestParam(name = "page", defaultValue = "0") Integer page,
         @RequestParam(name = "size", defaultValue = "10") Integer size) {
@@ -222,7 +215,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
 
     @Override
     @GetMapping(value = "/get-account", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_MANAGER') or hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public ResponseEntity<?> getAccountById(@RequestParam(name = "userId") String userId) {
         log.info("request has reached controller...");
         UserAccount existingAccount = userAccountService.getAccountById(userId);
