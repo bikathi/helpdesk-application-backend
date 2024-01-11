@@ -217,7 +217,6 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     @GetMapping(value = "/get-account", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public ResponseEntity<?> getAccountById(@RequestParam(name = "userId") String userId) {
-        log.info("request has reached controller...");
         UserAccount existingAccount = userAccountService.getAccountById(userId);
         AccDetailsResponse response = (AccDetailsResponse) this.convertEntityToPayload(existingAccount, AccDetailsResponse.class);
         response.setRoles(this.roleEnumColToStringCol(existingAccount.getRoles()));
