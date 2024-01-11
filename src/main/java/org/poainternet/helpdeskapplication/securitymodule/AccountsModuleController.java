@@ -228,7 +228,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
             new GenericResponse<>(
                 apiVersion,
                 organizationName,
-                "Successfully retrieved paged accounts list",
+                "Successfully retrieved user account",
                 HttpStatus.OK.value(),
                 response
             )
