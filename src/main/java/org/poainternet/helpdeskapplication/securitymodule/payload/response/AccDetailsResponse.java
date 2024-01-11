@@ -14,10 +14,12 @@ public class AccDetailsResponse {
     private String firstName;
     private String username;
     private String otherName;
+    private String profileImage;
     private String email;
     private String dateOfBirth;
     private Set<String> roles;
     private String authToken;
     private String csrfToken;
     private String department;
+    private Boolean accountEnabled;
 }
