@@ -1,9 +1,8 @@
 package org.poainternet.helpdeskapplication.securitymodule.abstractions;
 
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
-import org.poainternet.helpdeskapplication.securitymodule.payload.request.SearchCriteriaRequest;
+import org.poainternet.helpdeskapplication.securitymodule.definitions.SearchCriteriaDefinition;
 import org.poainternet.helpdeskapplication.sharedexceptions.EntityNotFoundException;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -13,5 +12,5 @@ public interface GenericAccountsService<T> {
     UserAccount createUserAccount(UserAccount userAccount);
     List<UserAccount> findListOfAccounts(Integer page, Integer size);
     void saveAccountDetails(UserAccount account);
-    List<UserAccount> searchAccountsByCriteria(SearchCriteriaRequest searchCriteria);
+    List<UserAccount> searchAccountsByCriteria(SearchCriteriaDefinition searchCriteria);
 }
