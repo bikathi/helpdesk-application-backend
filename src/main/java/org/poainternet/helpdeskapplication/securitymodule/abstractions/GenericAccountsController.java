@@ -1,6 +1,7 @@
 package org.poainternet.helpdeskapplication.securitymodule.abstractions;
 
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.ManAccRequest;
+import org.poainternet.helpdeskapplication.securitymodule.payload.request.SearchCriteriaRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.UpdatePasswordRequest;
 import org.springframework.http.ResponseEntity;
 
@@ -12,4 +13,5 @@ public interface GenericAccountsController {
     ResponseEntity<?> activateUserAccount(ManAccRequest request);
     ResponseEntity<?> getAccountsAsPage(Integer page, Integer size);
     ResponseEntity<?> getAccountById(String userId);
+    ResponseEntity<?> searchAccountByCriteria(SearchCriteriaRequest request);
 }
