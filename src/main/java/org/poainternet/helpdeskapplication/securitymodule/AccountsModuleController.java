@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericControllerHelper;
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericAccountsController;
+import org.poainternet.helpdeskapplication.securitymodule.definitions.SearchCriteriaDefinition;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
 import org.poainternet.helpdeskapplication.sharedexceptions.InternalServerError;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.ManAccRequest;
@@ -19,10 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.net.URI;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 @Slf4j
@@ -90,6 +90,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
         existingAccount.setRoles(this.stringColToRoleEnumCol(request.getRoles()));
         existingAccount.setDepartment(request.getDepartment());
         userAccountService.saveAccountDetails(existingAccount);
+        log.info("Successfully updated details for user {}", request.getUserId());
 
         return ResponseEntity.ok().body(
             new GenericResponse<>(
@@ -230,6 +231,41 @@ public class AccountsModuleController implements GenericAccountsController, Gene
                 "Successfully retrieved user account",
                 HttpStatus.OK.value(),
                 response
+            )
+        );
+    }
+
+    @Override
+    @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    public ResponseEntity<?> searchAccountByCriteria(
+        @RequestParam(name = "page", defaultValue = "0") Integer page,
+        @RequestParam(name = "searchTerm") String searchTerm,
+        @RequestParam(name = "byId") Boolean byId,
+        @RequestParam(name = "byUsername") Boolean byUsername,
+        @RequestParam(name = "byFirstOrOtherName") Boolean byFirstOrOtherName
+    ) {
+        SearchCriteriaDefinition searchCriteria = SearchCriteriaDefinition.builder()
+                .page(page)
+                .searchTerm(searchTerm.trim())
+                .SearchParams(new SearchCriteriaDefinition.SearchParams(byId, byUsername, byFirstOrOtherName))
+        .build();
+        List<UserAccount> userAccounts = userAccountService.searchAccountsByCriteria(searchCriteria);
+        List<AccDetailsResponse> responseList = userAccounts.parallelStream().map(
+            account -> {
+                AccDetailsResponse response = (AccDetailsResponse) this.convertEntityToPayload(account, AccDetailsResponse.class);
+                response.setRoles(this.roleEnumColToStringCol(account.getRoles()));
+                response.setDateOfBirth(this.localDateToDateString(account.getDateOfBirth()));
+                return response;
+        }).toList();
+        log.info("{}: successfully retrieved page {} accounts list using search criteria", CLASS_NAME, page);
+        return ResponseEntity.ok().body(
+            new GenericResponse<>(
+                apiVersion,
+                organizationName,
+                "Successfully retrieved paged accounts list",
+                HttpStatus.OK.value(),
+                responseList
             )
         );
     }
