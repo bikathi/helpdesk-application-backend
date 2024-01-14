@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public final class ModuleUtil {
@@ -31,5 +32,9 @@ public final class ModuleUtil {
 
         // return the search query
         return query.with(pageableRequest);
+    }
+
+    public static String generateAccountId() {
+        return UUID.randomUUID().toString().replace("-", "").trim().substring(0, 12);
     }
 }
