@@ -23,27 +23,26 @@ public class SharedControllerAdvice {
     @ExceptionHandler(value = EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<?> handleEntityNotFoundException(EntityNotFoundException ex) {
-        log.info("{}: dispatching event for EntityNotFoundException", CLASS_NAME);
-        return ResponseEntity.ok().body(
-            new GenericResponse<>(
+
+        log.info("{}: dispatching response for EntityNotFoundException caused by: {}", CLASS_NAME, ex.getMessage());
+        return new ResponseEntity<>(new GenericResponse<>(
                 apiVersion,
                 organizationName,
-                ex.getMessage(),
-                HttpStatus.OK.value(),
+                "Unique resource not found!",
+                HttpStatus.NOT_FOUND.value(),
                 null
-            )
-        );
+        ), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = InternalServerError.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<?> handleInternalServerError(InternalServerError ex) {
-        log.info("{}: dispatching event for InternalServerError", CLASS_NAME);
+        log.info("{}: dispatching response for InternalServerError caused by: {}", CLASS_NAME, ex.getMessage());
         return ResponseEntity.internalServerError().body(
             new GenericResponse<>(
                 apiVersion,
                 organizationName,
-                ex.getMessage(),
+                "Operation failed on the server!",
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 null
             )
