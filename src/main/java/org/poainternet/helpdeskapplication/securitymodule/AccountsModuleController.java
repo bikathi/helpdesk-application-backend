@@ -6,6 +6,7 @@ import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericCo
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericAccountsController;
 import org.poainternet.helpdeskapplication.securitymodule.definitions.SearchCriteriaDefinition;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
+import org.poainternet.helpdeskapplication.securitymodule.util.ModuleUtil;
 import org.poainternet.helpdeskapplication.sharedexceptions.InternalServerError;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.ManAccRequest;
 import org.poainternet.helpdeskapplication.securitymodule.payload.request.UpdatePasswordRequest;
@@ -46,10 +47,11 @@ public class AccountsModuleController implements GenericAccountsController, Gene
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @PostMapping(value = "/signup")
+    @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> signup(@RequestBody ManAccRequest request) {
         UserAccount userAccount = UserAccount.builder()
+            .userId(ModuleUtil.generateAccountId())
             .firstName(request.getFirstName())
             .otherName(request.getOtherName())
             .password(passwordEncoder.encode("poaInternetDefault"))
@@ -71,7 +73,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
                 apiVersion,
                 organizationName,
                 "Account created successfully",
-                HttpStatus.CREATED.value(),
+                HttpStatus.OK.value(),
                 response
             )
         );
@@ -90,7 +92,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
         existingAccount.setRoles(this.stringColToRoleEnumCol(request.getRoles()));
         existingAccount.setDepartment(request.getDepartment());
         userAccountService.saveAccountDetails(existingAccount);
-        log.info("Successfully updated details for user {}", request.getUserId());
+        log.info("{}: Successfully updated details for user {}", request.getUserId(), CLASS_NAME);
 
         return ResponseEntity.ok().body(
             new GenericResponse<>(
@@ -118,7 +120,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
 
         existingAccount.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userAccountService.saveAccountDetails(existingAccount);
-        log.info("Successfully updated password for user {}", request.getUserId());
+        log.info("{}: Successfully updated password for user {}", request.getUserId(), CLASS_NAME);
 
         return ResponseEntity.ok().body(
             new GenericResponse<>(
@@ -138,6 +140,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
         UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
         existingAccount.setRoles(this.stringColToRoleEnumCol(request.getRoles()));
         userAccountService.saveAccountDetails(existingAccount);
+        log.info("{}: Successfully modified roles for user {}", request.getUserId(), CLASS_NAME);
         return ResponseEntity.ok().body(
             new GenericResponse<>(
                 apiVersion,
@@ -156,7 +159,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
         UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
         existingAccount.setAccountEnabled(false);
         userAccountService.saveAccountDetails(existingAccount);
-
+        log.info("{}: Successfully deactivated account for user {}", request.getUserId(), CLASS_NAME);
         return ResponseEntity.ok().body(
             new GenericResponse<>(
                 apiVersion,
@@ -175,7 +178,7 @@ public class AccountsModuleController implements GenericAccountsController, Gene
         UserAccount existingAccount = userAccountService.getAccountById(request.getUserId());
         existingAccount.setAccountEnabled(true);
         userAccountService.saveAccountDetails(existingAccount);
-
+        log.info("{}: Successfully activated account for user {}", request.getUserId(), CLASS_NAME);
         return ResponseEntity.ok().body(
             new GenericResponse<>(
                 apiVersion,
