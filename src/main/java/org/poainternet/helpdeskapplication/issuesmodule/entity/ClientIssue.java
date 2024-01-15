@@ -21,7 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "client-issues")
-public class Issue implements Serializable {
+public class ClientIssue implements Serializable {
     @Serial
     private static final long serialVersionUID = UUID.randomUUID().getLeastSignificantBits();
 
