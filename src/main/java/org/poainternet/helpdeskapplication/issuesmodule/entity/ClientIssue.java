@@ -57,6 +57,9 @@ public class ClientIssue implements Serializable {
     private ClientIssueState issueStatus;
 
     @NotEmpty
+    private Boolean issueClosed;
+
+    @NotEmpty
     @Max(value = 700)
     private String issueDescription;
 
