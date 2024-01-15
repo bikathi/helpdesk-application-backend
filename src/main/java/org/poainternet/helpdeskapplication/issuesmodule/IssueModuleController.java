@@ -7,6 +7,7 @@ import org.poainternet.helpdeskapplication.issuesmodule.abstractions.GenericCont
 import org.poainternet.helpdeskapplication.issuesmodule.definitions.ClientIssueState;
 import org.poainternet.helpdeskapplication.issuesmodule.entity.ClientIssue;
 import org.poainternet.helpdeskapplication.issuesmodule.payload.request.CreateClientIssueRequest;
+import org.poainternet.helpdeskapplication.issuesmodule.payload.request.ModIssueRequest;
 import org.poainternet.helpdeskapplication.issuesmodule.payload.response.GenericResponse;
 import org.poainternet.helpdeskapplication.issuesmodule.service.ClientIssueService;
 import org.poainternet.helpdeskapplication.issuesmodule.util.ModuleUtil;
@@ -16,13 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -60,6 +57,7 @@ public class IssueModuleController implements GenericClientIssueController, Gene
             .clientEmail(request.getClientEmail())
             .clientPhone(request.getClientPhone())
             .issueStatus(ClientIssueState.valueOf(request.getIssueStatus()))
+            .issueClosed(false) // by default an issue is open i.e -> closed is false
             .issueDescription(request.getIssueDescription())
             .handlerUserIds(new HashSet<>(request.getHandlerUserIds()))
         .build();
@@ -75,8 +73,34 @@ public class IssueModuleController implements GenericClientIssueController, Gene
     }
 
     @Override
-    public ResponseEntity<?> markIssueAsClosed() {
-        return null;
+    @PatchMapping(value = "/close", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ROLE_MODERATOR') && #request.closedByUserId == authentication.principal.userid")
+    public ResponseEntity<?> markIssueAsClosed(@RequestBody ModIssueRequest request) {
+        clientIssueService.changeIssueClosedStatusTrue(request.getIssueId(), request.getClosedByUserId());
+        log.info("{}: Successfully marked issue with id {} as closed", CLASS_NAME, request.getIssueId());
+
+        return ResponseEntity.ok(new GenericResponse<>(
+            apiVersion,
+            organizationName,
+            "Successfully closed issue",
+            HttpStatus.OK.value(),
+            null
+        ));
+    }
+
+    @Override
+    @PatchMapping(value = "/re-open", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ROLE_MODERATOR') && #request.closedByUserId == authentication.principal.userid")
+    public ResponseEntity<?> reOpenIssue(@RequestBody ModIssueRequest request) {
+        clientIssueService.changeIssueClosedStatusFalse(request.getIssueId(), request.getOpenedByUserId());
+        log.info("{}: Successfully re-opened issue with id {}", CLASS_NAME, request.getIssueId());
+        return ResponseEntity.ok(new GenericResponse<>(
+            apiVersion,
+            organizationName,
+            "Successfully re-opened issue",
+            HttpStatus.OK.value(),
+            null
+        ));
     }
 
     @Override
@@ -98,6 +122,4 @@ public class IssueModuleController implements GenericClientIssueController, Gene
     public Object convertEntityToPayload(ClientIssue entity, Class<?> target) {
         return mapper.map(entity, target);
     }
-
-    public
 }
