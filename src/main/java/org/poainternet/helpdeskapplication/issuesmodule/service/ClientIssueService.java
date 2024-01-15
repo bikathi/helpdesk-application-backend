@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.poainternet.helpdeskapplication.issuesmodule.abstractions.GenericClientIssueService;
 import org.poainternet.helpdeskapplication.issuesmodule.entity.ClientIssue;
 import org.poainternet.helpdeskapplication.issuesmodule.repository.ClientIssueRepository;
+import org.poainternet.helpdeskapplication.sharedexceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -14,6 +15,7 @@ import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @Service
@@ -31,7 +33,8 @@ public class ClientIssueService implements GenericClientIssueService {
 
     @Override
     public ClientIssue getClientIssueById(String issueId) {
-        return null;
+        return clientIssueRepository.findById(issueId).orElseThrow(
+            () -> new EntityNotFoundException(String.format(Locale.ENGLISH, "Not found account for id %s", issueId)));
     }
 
     @Override
