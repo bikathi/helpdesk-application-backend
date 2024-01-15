@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.poainternet.helpdeskapplication.issuesmodule.definitions.ClientIssueState;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -26,7 +27,7 @@ public class ClientIssue implements Serializable {
     private static final long serialVersionUID = UUID.randomUUID().getLeastSignificantBits();
 
     @Id
-    private String userId;
+    private String issueId;
 
     @NotEmpty
     @Max(value = 50) // title must not be more than 50 characters long
@@ -34,6 +35,8 @@ public class ClientIssue implements Serializable {
 
     @NotEmpty
     private String openedByUserId;
+
+    private String closedByUserId;
 
     @NotEmpty
     private String clientName;
@@ -50,12 +53,14 @@ public class ClientIssue implements Serializable {
     @NotEmpty
     private String clientPhone;
 
-    private Boolean issueStatus;
+    @NotEmpty
+    private ClientIssueState issueStatus;
 
     @NotEmpty
     @Max(value = 700)
     private String issueDescription;
 
+    @NotEmpty
     private Set<String> handlerUserIds;
 
     @Data
