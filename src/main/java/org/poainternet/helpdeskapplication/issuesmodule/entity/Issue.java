@@ -42,8 +42,10 @@ public class Issue implements Serializable {
     private LocalDate dateReported;
 
     @Email
-    @NotEmpty
     private String clientEmail;
+
+    @NotEmpty
+    private String clientPhone;
 
     @NotEmpty
     @Max(value = 700)
