@@ -33,6 +33,9 @@ public class ClientIssue implements Serializable {
     private String issueTitle;
 
     @NotEmpty
+    private String openedByUserId;
+
+    @NotEmpty
     private String clientName;
 
     @NotEmpty
@@ -51,7 +54,7 @@ public class ClientIssue implements Serializable {
     @Max(value = 700)
     private String issueDescription;
 
-    private Set<String> handlerIds;
+    private Set<String> handlerUserIds;
 
     @Data
     @NoArgsConstructor
