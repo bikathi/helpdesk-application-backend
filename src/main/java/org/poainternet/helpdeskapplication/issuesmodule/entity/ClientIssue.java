@@ -50,6 +50,8 @@ public class ClientIssue implements Serializable {
     @NotEmpty
     private String clientPhone;
 
+    private Boolean issueStatus;
+
     @NotEmpty
     @Max(value = 700)
     private String issueDescription;
