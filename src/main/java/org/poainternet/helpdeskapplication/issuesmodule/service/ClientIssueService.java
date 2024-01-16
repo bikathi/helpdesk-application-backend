@@ -6,6 +6,8 @@ import org.poainternet.helpdeskapplication.issuesmodule.entity.ClientIssue;
 import org.poainternet.helpdeskapplication.issuesmodule.repository.ClientIssueRepository;
 import org.poainternet.helpdeskapplication.sharedexceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -44,7 +46,8 @@ public class ClientIssueService implements GenericClientIssueService {
 
     @Override
     public List<ClientIssue> getListOfClientIssues(Integer page, Integer size) {
-        return null;
+        Pageable pageable = PageRequest.of(page, size);
+        return clientIssueRepository.findAll(pageable).toList();
     }
 
     @Override
