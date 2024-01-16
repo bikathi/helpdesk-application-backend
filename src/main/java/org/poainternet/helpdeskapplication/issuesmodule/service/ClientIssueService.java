@@ -78,7 +78,7 @@ public class ClientIssueService implements GenericClientIssueService {
          * useless
          */
         UpdateDefinition updateDefinition =
-            new Update().set("issueClosed", false).set("openedByUserId", openedByUserId).set("closedByUserId", null);
+            new Update().set("issueClosed", false).set("openedByUserId", openedByUserId).set("closedByUserId", "");
         FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
 
         mongoTemplate.findAndModify(query, updateDefinition, options, ClientIssue.class);
