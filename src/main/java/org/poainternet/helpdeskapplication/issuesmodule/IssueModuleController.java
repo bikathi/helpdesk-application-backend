@@ -5,6 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.poainternet.helpdeskapplication.issuesmodule.abstractions.GenericClientIssueController;
 import org.poainternet.helpdeskapplication.issuesmodule.abstractions.GenericControllerHelper;
 import org.poainternet.helpdeskapplication.issuesmodule.definitions.ClientIssueState;
+import org.poainternet.helpdeskapplication.issuesmodule.definitions.IssuesSearchCriteria;
 import org.poainternet.helpdeskapplication.issuesmodule.definitions.Location;
 import org.poainternet.helpdeskapplication.issuesmodule.entity.ClientIssue;
 import org.poainternet.helpdeskapplication.issuesmodule.payload.request.CreateClientIssueRequest;
@@ -15,6 +16,7 @@ import org.poainternet.helpdeskapplication.issuesmodule.service.ClientIssueServi
 import org.poainternet.helpdeskapplication.issuesmodule.util.ModuleUtil;
 import org.poainternet.helpdeskapplication.securitymodule.AccountsModuleController;
 import org.poainternet.helpdeskapplication.securitymodule.SecurityModuleShareable;
+import org.poainternet.helpdeskapplication.securitymodule.definitions.AccountsSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -111,8 +113,30 @@ public class IssueModuleController implements GenericClientIssueController, Gene
     @Override
     @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<?> searchIssues() {
-        return null;
+    public ResponseEntity<?> searchIssues(
+        @RequestParam(name = "page", defaultValue = "0") Integer page,
+        @RequestParam(name = "searchTerm") String searchTerm,
+        @RequestParam(name = "byId") Boolean byId,
+        @RequestParam(name = "byClientEmail") Boolean byClientEmail,
+        @RequestParam(name = "byClientPhone") Boolean byClientPhone,
+        @RequestParam(name = "byHandlerId") Boolean byHandlerId
+    ) {
+        IssuesSearchCriteria searchCriteria = IssuesSearchCriteria.builder()
+            .page(page)
+            .searchTerm(searchTerm)
+            .SearchParams(new IssuesSearchCriteria.SearchParams(byId, byClientEmail, byClientPhone, byHandlerId))
+        .build();
+        List<ClientIssue> clientIssues = clientIssueService.searchClientIssues(searchCriteria);
+        List<ClientIssueResponse> responseList = clientIssues.parallelStream().map(this::generateClientIssueResponse).toList();
+        log.info("{}: Successfully retrieved issues list by search for page b{}", CLASS_NAME, page);
+
+        return ResponseEntity.ok(new GenericResponse<>(
+            apiVersion,
+            organizationName,
+            "Successfully retrieved issues list",
+            HttpStatus.OK.value(),
+            responseList
+        ));
     }
 
     @Override
