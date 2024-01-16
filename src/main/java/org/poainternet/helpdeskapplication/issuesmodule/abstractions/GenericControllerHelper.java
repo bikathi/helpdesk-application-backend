@@ -1,6 +1,9 @@
 package org.poainternet.helpdeskapplication.issuesmodule.abstractions;
 
 import org.poainternet.helpdeskapplication.issuesmodule.entity.ClientIssue;
+import org.poainternet.helpdeskapplication.issuesmodule.payload.response.ClientIssueResponse;
+import org.poainternet.helpdeskapplication.securitymodule.SecurityModuleShareable;
+import org.poainternet.helpdeskapplication.sharedDTO.SharedUserDTO;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -15,5 +18,11 @@ public interface GenericControllerHelper {
 
     default String localDateToDateString(LocalDate date) {
         return date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.ENGLISH));
+    }
+
+    default ClientIssueResponse.UserEntity prepareUserEntity(SecurityModuleShareable securityModuleShareable, String userId) {
+        SharedUserDTO sharedUserDTO = securityModuleShareable.getMinifiedUserAccountById(userId);
+
+        return new ClientIssueResponse.UserEntity(sharedUserDTO.getUserId(), sharedUserDTO.getUsername(), sharedUserDTO.getFirstName(), sharedUserDTO.getOtherName(), sharedUserDTO.getProfileImage());
     }
 }
