@@ -1,5 +1,8 @@
 package org.poainternet.helpdeskapplication.issuesmodule.definitions;
 
+import lombok.Getter;
+
+@Getter
 public enum ClientIssueState {
     ACTIVE("active"),
     INACTIVE("inactive"),
