@@ -22,7 +22,6 @@ public class ClientIssueResponse {
     private String dateReported;
     private String clientEmail;
     private String clientPhone;
-    private String issueStatus;
     private Boolean issueClosed;
     private String issueDescription;
     private List<UserEntity> handlerUsers;

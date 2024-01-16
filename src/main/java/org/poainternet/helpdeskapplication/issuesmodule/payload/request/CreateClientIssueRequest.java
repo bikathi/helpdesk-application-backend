@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.poainternet.helpdeskapplication.issuesmodule.definitions.Location;
 import org.springframework.data.annotation.Id;
 
 import java.util.List;
@@ -40,20 +41,10 @@ public class CreateClientIssueRequest {
     @NotEmpty
     private String clientPhone;
 
-    private String issueStatus; // active, inactive, dormant
-
     @NotEmpty
     @Max(value = 700)
     private String issueDescription;
 
     @NotEmpty
     private List<String> handlerUserIds;
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Location {
-        private String county;
-        private String area;
-    }
 }
