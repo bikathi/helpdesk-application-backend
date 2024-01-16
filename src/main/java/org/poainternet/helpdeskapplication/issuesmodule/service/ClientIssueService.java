@@ -2,8 +2,10 @@ package org.poainternet.helpdeskapplication.issuesmodule.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.poainternet.helpdeskapplication.issuesmodule.abstractions.GenericClientIssueService;
+import org.poainternet.helpdeskapplication.issuesmodule.definitions.IssuesSearchCriteria;
 import org.poainternet.helpdeskapplication.issuesmodule.entity.ClientIssue;
 import org.poainternet.helpdeskapplication.issuesmodule.repository.ClientIssueRepository;
+import org.poainternet.helpdeskapplication.issuesmodule.util.ModuleUtil;
 import org.poainternet.helpdeskapplication.sharedexceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -40,19 +42,15 @@ public class ClientIssueService implements GenericClientIssueService {
     }
 
     @Override
-    public ClientIssue updateClientIssueStatus(String issueId, String status) {
-        return null;
-    }
-
-    @Override
     public List<ClientIssue> getListOfClientIssues(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
         return clientIssueRepository.findAll(pageable).toList();
     }
 
     @Override
-    public List<ClientIssue> searchClientIssues() {
-        return null;
+    public List<ClientIssue> searchClientIssues(IssuesSearchCriteria searchCriteria) {
+        Query searchQuery = ModuleUtil.generateSearchQuery(searchCriteria);
+        return mongoTemplate.find(searchQuery, ClientIssue.class);
     }
 
     @Override
