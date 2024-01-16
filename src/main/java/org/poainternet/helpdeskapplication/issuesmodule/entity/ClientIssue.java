@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.poainternet.helpdeskapplication.issuesmodule.definitions.ClientIssueState;
 import org.poainternet.helpdeskapplication.issuesmodule.definitions.Location;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -53,9 +52,6 @@ public class ClientIssue implements Serializable {
 
     @NotEmpty
     private String clientPhone;
-
-    @NotEmpty
-    private ClientIssueState issueStatus;
 
     @NotEmpty
     private Boolean issueClosed;
