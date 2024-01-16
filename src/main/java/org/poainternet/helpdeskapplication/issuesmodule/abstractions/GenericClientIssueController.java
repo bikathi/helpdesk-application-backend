@@ -10,7 +10,14 @@ public interface GenericClientIssueController {
 
     ResponseEntity<?> reOpenIssue(ModIssueRequest request);
 
-    ResponseEntity<?> searchIssues();
+    ResponseEntity<?> searchIssues(
+        Integer page,
+        String searchQuery,
+        Boolean byId,
+        Boolean byClientEmail,
+        Boolean byClientPhone,
+        Boolean byHandlerUID
+    );
 
     ResponseEntity<?> getListOfIssues(Integer page, Integer size);
 
