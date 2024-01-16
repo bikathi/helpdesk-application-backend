@@ -36,6 +36,6 @@ public final class ModuleUtil {
     }
 
     public static String generateAccountId() {
-        return UUID.randomUUID().toString().replace("-", "").trim().substring(0, 12);
+        return UUID.randomUUID().toString().replace("-", "").trim().substring(0, 6);
     }
 }
