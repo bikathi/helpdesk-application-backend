@@ -12,7 +12,7 @@ public interface GenericClientIssueController {
 
     ResponseEntity<?> searchIssues();
 
-    ResponseEntity<?> getListOfIssues();
+    ResponseEntity<?> getListOfIssues(Integer page, Integer size);
 
-    ResponseEntity<?> getIssueById();
+    ResponseEntity<?> getIssueById(String clientIssueId);
 }
