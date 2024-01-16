@@ -21,7 +21,7 @@ public interface GenericControllerHelper {
 
     default Set<UserRole> stringColToRoleEnumCol(String[] userRoles) throws InternalServerError {
         Set<UserRole> roles = new HashSet<>();
-        for(String role : userRoles) { roles.add(UserRole.valueOf(role)); }
+        for(String role : userRoles) { roles.add(UserRole.getEnumFromString(role)); }
         return roles;
     }
 

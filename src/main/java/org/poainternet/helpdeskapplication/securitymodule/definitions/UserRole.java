@@ -13,4 +13,14 @@ public enum UserRole {
     UserRole(String label) {
         this.label = label;
     }
+
+    public static UserRole getEnumFromString(String str) {
+        for (UserRole state : UserRole.values()) {
+            if (state.getLabel().equalsIgnoreCase(str)) {
+                return state;
+            }
+        }
+        throw new IllegalArgumentException("Invalid string value for ClientIssueState: " + str);
+    }
+
 }
