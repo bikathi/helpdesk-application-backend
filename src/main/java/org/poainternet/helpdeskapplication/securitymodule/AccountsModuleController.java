@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericControllerHelper;
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericAccountsController;
-import org.poainternet.helpdeskapplication.securitymodule.definitions.SearchCriteriaDefinition;
+import org.poainternet.helpdeskapplication.securitymodule.definitions.AccountsSearchCriteria;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
 import org.poainternet.helpdeskapplication.securitymodule.util.ModuleUtil;
 import org.poainternet.helpdeskapplication.sharedexceptions.InternalServerError;
@@ -23,7 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 @Slf4j
@@ -248,10 +247,10 @@ public class AccountsModuleController implements GenericAccountsController, Gene
         @RequestParam(name = "byUsername") Boolean byUsername,
         @RequestParam(name = "byFirstOrOtherName") Boolean byFirstOrOtherName
     ) {
-        SearchCriteriaDefinition searchCriteria = SearchCriteriaDefinition.builder()
-                .page(page)
-                .searchTerm(searchTerm.trim())
-                .SearchParams(new SearchCriteriaDefinition.SearchParams(byId, byUsername, byFirstOrOtherName))
+        AccountsSearchCriteria searchCriteria = AccountsSearchCriteria.builder()
+            .page(page)
+            .searchTerm(searchTerm.trim())
+            .SearchParams(new AccountsSearchCriteria.SearchParams(byId, byUsername, byFirstOrOtherName))
         .build();
         List<UserAccount> userAccounts = userAccountService.searchAccountsByCriteria(searchCriteria);
         List<AccDetailsResponse> responseList = userAccounts.parallelStream().map(
