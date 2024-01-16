@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.poainternet.helpdeskapplication.issuesmodule.abstractions.GenericClientIssueController;
 import org.poainternet.helpdeskapplication.issuesmodule.abstractions.GenericControllerHelper;
-import org.poainternet.helpdeskapplication.issuesmodule.definitions.ClientIssueState;
 import org.poainternet.helpdeskapplication.issuesmodule.definitions.IssuesSearchCriteria;
 import org.poainternet.helpdeskapplication.issuesmodule.definitions.Location;
 import org.poainternet.helpdeskapplication.issuesmodule.entity.ClientIssue;
@@ -14,9 +13,7 @@ import org.poainternet.helpdeskapplication.issuesmodule.payload.response.ClientI
 import org.poainternet.helpdeskapplication.issuesmodule.payload.response.GenericResponse;
 import org.poainternet.helpdeskapplication.issuesmodule.service.ClientIssueService;
 import org.poainternet.helpdeskapplication.issuesmodule.util.ModuleUtil;
-import org.poainternet.helpdeskapplication.securitymodule.AccountsModuleController;
 import org.poainternet.helpdeskapplication.securitymodule.SecurityModuleShareable;
-import org.poainternet.helpdeskapplication.securitymodule.definitions.AccountsSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -58,12 +55,12 @@ public class IssueModuleController implements GenericClientIssueController, Gene
             .issueId(ModuleUtil.generateIssueId())
             .issueTitle(request.getIssueTitle())
             .openedByUserId(request.getOpenedByUserId())
+            .closedByUserId("") // we set an empty string here so that the field is not NULL and thus never shows up in the db
             .clientName(request.getClientName())
             .clientLocation(new Location(request.getClientLocation().getCounty(), request.getClientLocation().getArea()))
             .dateReported(this.dateStringToLocalDate(request.getDateReported()))
             .clientEmail(Objects.isNull(request.getClientEmail()) ? null : request.getClientEmail())
             .clientPhone(request.getClientPhone())
-            .issueStatus(ClientIssueState.valueOf(request.getIssueStatus()))
             .issueClosed(false) // by default an issue is open i.e -> closed is false
             .issueDescription(request.getIssueDescription())
             .handlerUserIds(new HashSet<>(request.getHandlerUserIds()))
@@ -73,7 +70,7 @@ public class IssueModuleController implements GenericClientIssueController, Gene
         return ResponseEntity.ok(new GenericResponse<>(
             apiVersion,
             organizationName,
-            "Successfully retrieved paged accounts list",
+            "Successfully created new issue",
             HttpStatus.OK.value(),
             null
         ));
@@ -97,7 +94,7 @@ public class IssueModuleController implements GenericClientIssueController, Gene
 
     @Override
     @PatchMapping(value = "/re-open", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('ROLE_MODERATOR') && #request.closedByUserId == authentication.principal.userid")
+    @PreAuthorize("hasRole('ROLE_MODERATOR') && #request.openedByUserId == authentication.principal.userid")
     public ResponseEntity<?> reOpenIssue(@RequestBody ModIssueRequest request) {
         clientIssueService.changeIssueClosedStatusFalse(request.getIssueId(), request.getOpenedByUserId());
         log.info("{}: Successfully re-opened issue with id {}", CLASS_NAME, request.getIssueId());
@@ -192,7 +189,6 @@ public class IssueModuleController implements GenericClientIssueController, Gene
             .dateReported(this.localDateToDateString(clientIssue.getDateReported()))
             .clientEmail(Objects.isNull(clientIssue.getClientEmail()) ? null : clientIssue.getClientEmail())
             .clientPhone(clientIssue.getClientPhone())
-            .issueStatus(clientIssue.getIssueStatus().getLabel())
             .issueClosed(clientIssue.getIssueClosed())
             .issueDescription(clientIssue.getIssueDescription())
             .handlerUsers(clientIssue.getHandlerUserIds().parallelStream().map(handlerId -> this.prepareUserEntity(securityModuleShareable, handlerId)).toList())
