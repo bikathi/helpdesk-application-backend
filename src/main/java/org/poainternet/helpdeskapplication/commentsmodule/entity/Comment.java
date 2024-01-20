@@ -26,9 +26,15 @@ public class Comment implements Serializable {
     private String commentId;
 
     @NotEmpty
+    private String issueId;
+
+    @NotEmpty
     private String commenterId;
 
     private LocalDateTime commentTime;
+    private LocalDateTime lastEdited;
     private String commentTitle;
+
+    @NotEmpty
     private String comment; // a string composed of HTML characters
 }
