@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.poainternet.helpdeskapplication.commentsmodule.definitions.CommentType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -27,6 +28,9 @@ public class Comment implements Serializable {
 
     @NotEmpty
     private String issueId;
+
+    @NotEmpty
+    private CommentType commentType;
 
     @NotEmpty
     private String commenterId;
