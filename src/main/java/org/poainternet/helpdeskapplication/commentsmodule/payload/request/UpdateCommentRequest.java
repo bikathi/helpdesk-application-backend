@@ -1,4 +1,4 @@
-package org.poainternet.helpdeskapplication.commentsmodule.payload.response;
+package org.poainternet.helpdeskapplication.commentsmodule.payload.request;
 
 public class UpdateCommentRequest {
 }
