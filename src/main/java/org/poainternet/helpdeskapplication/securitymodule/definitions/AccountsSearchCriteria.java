@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SearchCriteriaDefinition {
+public class AccountsSearchCriteria {
     private String searchTerm;
     private Integer page;
     private SearchParams SearchParams;

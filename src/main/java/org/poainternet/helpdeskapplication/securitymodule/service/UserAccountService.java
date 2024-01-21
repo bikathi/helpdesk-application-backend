@@ -3,7 +3,7 @@ package org.poainternet.helpdeskapplication.securitymodule.service;
 import lombok.extern.slf4j.Slf4j;
 import org.poainternet.helpdeskapplication.securitymodule.abstractions.GenericAccountsService;
 import org.poainternet.helpdeskapplication.securitymodule.entity.UserAccount;
-import org.poainternet.helpdeskapplication.securitymodule.definitions.SearchCriteriaDefinition;
+import org.poainternet.helpdeskapplication.securitymodule.definitions.AccountsSearchCriteria;
 import org.poainternet.helpdeskapplication.securitymodule.util.ModuleUtil;
 import org.poainternet.helpdeskapplication.sharedexceptions.EntityNotFoundException;
 import org.poainternet.helpdeskapplication.sharedexceptions.InternalServerError;
@@ -61,7 +61,7 @@ public class UserAccountService implements GenericAccountsService<UserAccount> {
     }
 
     @Override
-    public List<UserAccount> searchAccountsByCriteria(SearchCriteriaDefinition searchCriteria) {
+    public List<UserAccount> searchAccountsByCriteria(AccountsSearchCriteria searchCriteria) {
         Query searchQuery =  ModuleUtil.generateSearchQuery(searchCriteria);
         return mongoTemplate.find(searchQuery, UserAccount.class);
     }
