@@ -157,6 +157,27 @@ public class IssueModuleController implements GenericClientIssueController, Gene
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(value = "/get-list-by-status", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getListOfIssuesByClosedStatus(
+        @RequestParam(name = "page", defaultValue = "0") Integer page,
+        @RequestParam(name = "size", defaultValue = "10") Integer size,
+        @RequestParam(name = "issueClosed") Boolean issueOpen) {
+        List<ClientIssue> clientIssues = clientIssueService.getListByClosedStatus(page, size, issueOpen);
+        List<ClientIssueResponse> responseList = clientIssues.parallelStream().map(this::generateClientIssueResponse).toList();
+        log.info("{}: Successfully retrieved issues list for page {} by issue closed status {}", CLASS_NAME, page, issueOpen);
+
+        return ResponseEntity.ok(new GenericResponse<>(
+            apiVersion,
+            organizationName,
+            "Successfully retrieved issues list",
+            HttpStatus.OK.value(),
+            responseList
+        ));
+    }
+
+
+    @Override
     @GetMapping(value = "/get-by-id", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> getIssueById(@RequestParam(name = "id") String clientIssueId) {

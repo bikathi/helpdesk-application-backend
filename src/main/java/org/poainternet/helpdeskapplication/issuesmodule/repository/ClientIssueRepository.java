@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ClientIssueRepository extends MongoRepository<ClientIssue, String> {
     Page<ClientIssue> findAll(Pageable pageable);
+    Page<ClientIssue> findAllByIssueClosed(Pageable pageable, Boolean issueClosed);
 }

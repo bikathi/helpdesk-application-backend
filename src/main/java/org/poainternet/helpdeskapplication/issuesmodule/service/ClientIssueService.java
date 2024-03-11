@@ -48,6 +48,12 @@ public class ClientIssueService implements GenericClientIssueService {
     }
 
     @Override
+    public List<ClientIssue> getListByClosedStatus(Integer page, Integer size, Boolean issueOpen) {
+        Pageable pageable = PageRequest.of(page, size);
+        return clientIssueRepository.findAllByIssueClosed(pageable, issueOpen).toList();
+    }
+
+    @Override
     public List<ClientIssue> searchClientIssues(IssuesSearchCriteria searchCriteria) {
         Query searchQuery = ModuleUtil.generateSearchQuery(searchCriteria);
         return mongoTemplate.find(searchQuery, ClientIssue.class);

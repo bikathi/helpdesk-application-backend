@@ -20,6 +20,7 @@ public interface GenericClientIssueController {
     );
 
     ResponseEntity<?> getListOfIssues(Integer page, Integer size);
+    ResponseEntity<?> getListOfIssuesByClosedStatus(Integer page, Integer size, Boolean issueOpen);
 
     ResponseEntity<?> getIssueById(String clientIssueId);
 }
