@@ -18,7 +18,7 @@ public class CommentService implements GenericCommentService {
 
     @Override
     public List<Comment> getCommentList(String issueId, Integer page) {
-        Pageable pageInfo = PageRequest.of(page, 10);
+        Pageable pageInfo = PageRequest.of(page, 100);
         return commentRepository.findAllByIssueId(issueId, pageInfo).toList();
     }
 

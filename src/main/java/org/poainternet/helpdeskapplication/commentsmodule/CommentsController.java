@@ -122,6 +122,7 @@ public class CommentsController implements GenericCommentsController, GenericCon
             .lastEdited(Objects.isNull(comment.getLastEdited()) ? null : this.ldtToDateTimeString(comment.getLastEdited()))
             .commentTime(this.ldtToDateTimeString(comment.getCommentTime()))
             .commentType(this.commentTypeEnumToString(comment.getCommentType()))
+            .commentString(comment.getComment())
             .commentTitle(Objects.isNull(comment.getCommentTitle()) ? null : comment.getCommentTitle())
         .build();
     }

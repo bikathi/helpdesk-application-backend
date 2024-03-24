@@ -17,6 +17,7 @@ public class CommentDetailsResponse {
     private String lastEdited;
     private String commentTitle;
     private String commentType;
+    private String commentString;
 
     @Data
     @AllArgsConstructor
