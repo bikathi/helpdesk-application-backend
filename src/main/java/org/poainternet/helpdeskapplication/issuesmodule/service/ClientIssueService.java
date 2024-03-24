@@ -1,5 +1,8 @@
 package org.poainternet.helpdeskapplication.issuesmodule.service;
 
+import com.africastalking.AfricasTalking;
+import com.africastalking.SmsService;
+import com.africastalking.sms.Recipient;
 import lombok.extern.slf4j.Slf4j;
 import org.poainternet.helpdeskapplication.issuesmodule.abstractions.GenericClientIssueService;
 import org.poainternet.helpdeskapplication.issuesmodule.definitions.IssuesSearchCriteria;
@@ -8,6 +11,7 @@ import org.poainternet.helpdeskapplication.issuesmodule.repository.ClientIssueRe
 import org.poainternet.helpdeskapplication.issuesmodule.util.ModuleUtil;
 import org.poainternet.helpdeskapplication.sharedexceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -24,6 +28,11 @@ import java.util.Locale;
 @Slf4j
 @Service
 public class ClientIssueService implements GenericClientIssueService {
+    @Value("${africastalking.application-name}")
+    private String atAppName;
+    @Value("${africastalking.api-key}")
+    private String atApiKey;
+
     @Autowired
     private ClientIssueRepository clientIssueRepository;
 
@@ -32,7 +41,8 @@ public class ClientIssueService implements GenericClientIssueService {
 
     @Override
     public void createNewIssue(ClientIssue clientIssue) {
-        clientIssueRepository.save(clientIssue);
+        ClientIssue issue = clientIssueRepository.save(clientIssue);
+        this.sendClientSMS(issue.getClientPhone(), issue.getIssueId());
     }
 
     @Override
@@ -88,5 +98,20 @@ public class ClientIssueService implements GenericClientIssueService {
         FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
 
         mongoTemplate.findAndModify(query, updateDefinition, options, ClientIssue.class);
+    }
+
+    public void sendClientSMS(String clientPhone, String openedIssueId) {
+        final String CLIENT_MESSAGE = "Issue ID: " + openedIssueId;
+        log.info("AT username: {} api key: {} ", atAppName, atApiKey);
+
+        AfricasTalking.initialize(atAppName, atApiKey);
+        SmsService sms = AfricasTalking.getService(AfricasTalking.SERVICE_SMS);
+        try {
+            List<Recipient> response = sms.send(CLIENT_MESSAGE, new String[] { clientPhone }, true);
+            log.info("SMS response: {}", response);
+        } catch(Exception ex) {
+            log.error("SMS exception occurred: {}", ex.getMessage());
+        }
+
     }
 }

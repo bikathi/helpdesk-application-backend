@@ -34,4 +34,7 @@ application:
     jwt-expiration-ms:  # expires after 1 hr
     xsrf-secret:
 
+africastalking:
+  sms-api-key:
+  application-name:
 
