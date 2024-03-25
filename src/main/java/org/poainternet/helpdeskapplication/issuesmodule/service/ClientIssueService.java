@@ -42,7 +42,7 @@ public class ClientIssueService implements GenericClientIssueService {
     @Override
     public void createNewIssue(ClientIssue clientIssue) {
         ClientIssue issue = clientIssueRepository.save(clientIssue);
-        this.sendClientSMS(issue.getClientPhone(), issue.getIssueId());
+        this.issueOpenSendClientSMS(issue.getClientName(), issue.getClientPhone(), issue.getIssueId());
     }
 
     @Override
@@ -82,6 +82,10 @@ public class ClientIssueService implements GenericClientIssueService {
         FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
 
         mongoTemplate.findAndModify(query, updateDefinition, options, ClientIssue.class);
+
+        // send SMS update to client that the issue has been closed
+        ClientIssue existingClientIssue = this.getClientIssueById(clientIssueId);
+        this.issueClosedSendClientSMS(existingClientIssue.getClientName(), existingClientIssue.getClientPhone(), existingClientIssue.getIssueId());
     }
 
     @Override
@@ -100,9 +104,10 @@ public class ClientIssueService implements GenericClientIssueService {
         mongoTemplate.findAndModify(query, updateDefinition, options, ClientIssue.class);
     }
 
-    public void sendClientSMS(String clientPhone, String openedIssueId) {
-        final String CLIENT_MESSAGE = "Issue ID: " + openedIssueId;
-        log.info("AT username: {} api key: {} ", atAppName, atApiKey);
+    public void issueOpenSendClientSMS(String clientName, String clientPhone, String openedIssueId) {
+        final String CLIENT_MESSAGE = "Hello " + clientName +
+                "! an issue has been opened for you at Poa Internet with ID " + openedIssueId +
+                ". Feel free to contact customer care and provide this id in case of any issue you may have.";
 
         AfricasTalking.initialize(atAppName, atApiKey);
         SmsService sms = AfricasTalking.getService(AfricasTalking.SERVICE_SMS);
@@ -112,6 +117,20 @@ public class ClientIssueService implements GenericClientIssueService {
         } catch(Exception ex) {
             log.error("SMS exception occurred: {}", ex.getMessage());
         }
+    }
 
+    public void issueClosedSendClientSMS(String clientName, String clientPhone, String openedIssueId) {
+        final String CLIENT_MESSAGE = "Hello " + clientName +
+                "! Please note that your issue with ID " + openedIssueId +
+                ". has been closed. Should the issue arise again, feel free to contact customer care and provide this ID again.";
+
+        AfricasTalking.initialize(atAppName, atApiKey);
+        SmsService sms = AfricasTalking.getService(AfricasTalking.SERVICE_SMS);
+        try {
+            List<Recipient> response = sms.send(CLIENT_MESSAGE, new String[] { clientPhone }, true);
+            log.info("SMS response: {}", response);
+        } catch(Exception ex) {
+            log.error("SMS exception occurred: {}", ex.getMessage());
+        }
     }
 }
